@@ -6,9 +6,11 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Environment
 import android.os.StatFs
+import com.asgfx.bgmi.models.GameModel
 
 object DeviceUtils {
 
+    // 1. Check specific BGMI installation
     fun isBGMIInstalled(context: Context): Boolean {
         return try {
             context.packageManager.getPackageInfo("com.pubg.imobile", 0)
@@ -18,14 +20,14 @@ object DeviceUtils {
         }
     }
 
-    // Naya function jo saare games scan karega
-    fun getAllInstalledGames(context: Context): List<String> {
+    // 2. NEW: Get full details of all installed games for the Launcher
+    fun getInstalledGamesInfo(context: Context): List<GameModel> {
         val pm = context.packageManager
         val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-        val gamePackages = mutableListOf<String>()
+        val gameList = mutableListOf<GameModel>()
 
         for (appInfo in packages) {
-            // Check if app is a game or known battle royale
+            // Filter logic for games
             val isGame = (appInfo.flags and ApplicationInfo.FLAG_IS_GAME != 0) || 
                          appInfo.packageName.contains("pubg") || 
                          appInfo.packageName.contains("freefire") || 
@@ -33,12 +35,24 @@ object DeviceUtils {
                          appInfo.packageName.contains("mobile")
 
             if (isGame && pm.getLaunchIntentForPackage(appInfo.packageName) != null) {
-                gamePackages.add(appInfo.packageName)
+                gameList.add(
+                    GameModel(
+                        name = pm.getApplicationLabel(appInfo).toString(),
+                        packageName = appInfo.packageName,
+                        icon = pm.getApplicationIcon(appInfo)
+                    )
+                )
             }
         }
-        return gamePackages
+        return gameList
     }
 
+    // 3. Simple list of package names (for Smart Launch button)
+    fun getAllInstalledGames(context: Context): List<String> {
+        return getInstalledGamesInfo(context).map { it.packageName }
+    }
+
+    // 4. RAM Information
     fun getTotalRAM(context: Context): String {
         val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memInfo = ActivityManager.MemoryInfo()
@@ -47,6 +61,7 @@ object DeviceUtils {
         return String.format("%.1f GB", totalGB)
     }
 
+    // 5. Performance Tier
     fun getPerformanceTier(context: Context): String {
         val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memInfo = ActivityManager.MemoryInfo()
@@ -59,6 +74,7 @@ object DeviceUtils {
         }
     }
 
+    // 6. Storage Status
     fun getStoragePercent(): Int {
         return try {
             val stat = StatFs(Environment.getDataDirectory().path)
