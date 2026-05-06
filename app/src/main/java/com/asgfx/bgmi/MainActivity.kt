@@ -58,9 +58,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Agar XML mein ID 'btnCoreUtility' nahi hai toh ye error dega. 
-        // Isliye button clicks ko dhyan se check karein.
-        binding.btnGraphics.setOnLongClickListener {
+        // Is line ko check karein, agar XML mein button hai tabhi ye chalega
+        binding.btnRunGame.setOnLongClickListener {
             startActivity(Intent(this, CoreUtilityActivity::class.java))
             true
         }
