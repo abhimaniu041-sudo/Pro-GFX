@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivitySensitivityBinding
 import com.asgfx.bgmi.utils.DeviceUtils
@@ -76,7 +77,7 @@ class SensitivityActivity : AppCompatActivity() {
             val tvValue = TextView(this).apply {
                 text = value
                 setTextColor(getColor(R.color.colorPrimary))
-                textStyle = android.graphics.Typeface.BOLD
+                setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.END
             }
 
