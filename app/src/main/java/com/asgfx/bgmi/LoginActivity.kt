@@ -8,7 +8,6 @@ import com.asgfx.bgmi.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
 
-    // ViewBinding use kar rahe hain layouts access karne ke liye
     private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,30 +15,17 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Login Button Click Listener
         binding.btnLogin.setOnClickListener {
             val username = binding.etUsername.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
 
-            // Basic Validation
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please enter your credentials", Toast.LENGTH_SHORT).show()
+            if (username.isNotEmpty() && password.isNotEmpty()) {
+                Toast.makeText(this, "Welcome $username", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
             } else {
-                // Filhal hum koi bhi login accept kar rahe hain
-                // Baad mein yahan Firebase ya Database check add kar sakte hain
-                performLogin(username)
+                Toast.makeText(this, "Please enter all details", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-
-    private fun performLogin(user: String) {
-        Toast.makeText(this, "Welcome, $user!", Toast.LENGTH_SHORT).show()
-        
-        // Login successful hone par MainActivity par bhej dein
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        
-        // finish() zaroori hai taaki user back button daba kar wapas login page par na aa sake
-        finish()
     }
 }
