@@ -40,12 +40,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnRunGame.setOnClickListener {
-            val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
-            if (launchIntent != null) {
-                Toast.makeText(this, "Launching BGMI...", Toast.LENGTH_SHORT).show()
-                startActivity(launchIntent)
+            val installedGames = DeviceUtils.getAllInstalledGames(this)
+            
+            if (installedGames.isNotEmpty()) {
+                // Priority: Agar BGMI hai toh wahi launch karein, warna pehla game
+                val targetPackage = if (installedGames.contains("com.pubg.imobile")) {
+                    "com.pubg.imobile"
+                } else {
+                    installedGames[0]
+                }
+
+                val launchIntent = packageManager.getLaunchIntentForPackage(targetPackage)
+                if (launchIntent != null) {
+                    val gameName = packageManager.getApplicationLabel(
+                        packageManager.getApplicationInfo(targetPackage, 0)
+                    )
+                    Toast.makeText(this, "Launching $gameName...", Toast.LENGTH_SHORT).show()
+                    startActivity(launchIntent)
+                }
             } else {
-                Toast.makeText(this, "BGMI is not installed!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No games found on this device!", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -59,7 +73,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Long click to open Core Utility settings
         binding.btnRunGame.setOnLongClickListener {
             startActivity(Intent(this, CoreUtilityActivity::class.java))
             true
