@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.asgfx.bgmi.adapter.GameAdapter
 import com.asgfx.bgmi.databinding.ActivityMainBinding
@@ -36,22 +38,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun initGameLauncher() {
         val games = DeviceUtils.getInstalledGamesInfo(this)
-        
         binding.rvGameList.apply {
-            // Horizontal list setup
             layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = GameAdapter(games) { pkgName ->
                 val launchIntent = packageManager.getLaunchIntentForPackage(pkgName)
-                if (launchIntent != null) {
-                    startActivity(launchIntent)
-                } else {
-                    Toast.makeText(this@MainActivity, "Launch failed!", Toast.LENGTH_SHORT).show()
-                }
+                if (launchIntent != null) startActivity(launchIntent)
             }
         }
     }
 
     private fun setupClickListeners() {
+        // Settings click listener for theme
+        binding.ivSettings.setOnClickListener {
+            showThemeDialog()
+        }
+
         binding.btnSensitivity.setOnClickListener {
             startActivity(Intent(this, SensitivityActivity::class.java))
         }
@@ -63,12 +64,9 @@ class MainActivity : AppCompatActivity() {
         binding.btnRunGame.setOnClickListener {
             val installedGames = DeviceUtils.getAllInstalledGames(this)
             if (installedGames.isNotEmpty()) {
-                // BGMI ko pehle dhundo, nahi toh pehla game launch karo
                 val target = if (installedGames.contains("com.pubg.imobile")) "com.pubg.imobile" else installedGames[0]
                 val intent = packageManager.getLaunchIntentForPackage(target)
                 if (intent != null) startActivity(intent)
-            } else {
-                Toast.makeText(this, "No games found!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -81,5 +79,20 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showThemeDialog() {
+        val themes = arrayOf("Light Mode", "Dark Mode", "System Default")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Choose Theme")
+        builder.setItems(themes) { _, which ->
+            when (which) {
+                0 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                1 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                2 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            }
+            Toast.makeText(this, "Theme applied!", Toast.LENGTH_SHORT).show()
+        }
+        builder.show()
     }
 }
