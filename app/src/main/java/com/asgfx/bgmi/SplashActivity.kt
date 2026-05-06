@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.animation.AlphaAnimation
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivitySplashBinding
 
@@ -17,21 +16,10 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Fade-in animation for logo
-        val fadeIn = AlphaAnimation(0f, 1f)
-        fadeIn.duration = 1500
-        binding.logoContainer.startAnimation(fadeIn)
-
-        // Navigate to MainActivity after 3 seconds
+        // 2 Seconds ke baad LoginActivity par le jayega
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
-        }, 3000)
-    }
-
-    // Disable back button during splash
-    override fun onBackPressed() {
-        // Do nothing
+        }, 2000)
     }
 }
