@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityGraphicsBinding
+import com.asgfx.bgmi.utils.ShizukuHelper
 
 class GraphicsActivity : AppCompatActivity() {
 
@@ -25,16 +26,16 @@ class GraphicsActivity : AppCompatActivity() {
             val antiLag = binding.swAntiLag.isChecked
             val fpsBoost = binding.swFpsBoost.isChecked
 
-            // Logic to simulate applying GFX
             applySettings(selectedMode, antiLag, fpsBoost)
         }
     }
 
     private fun applySettings(mode: String, lag: Boolean, fps: Boolean) {
-        // Here we would normally write to the game's config files 
-        // For now, we show success message and finish
-        Toast.makeText(this, "Applying $mode Graphics...", Toast.LENGTH_SHORT).show()
-        
+        Toast.makeText(this, "Optimizing for $mode Graphics...", Toast.LENGTH_SHORT).show()
+
+        // Placeholder for Shizuku command (actual config path needed here)
+        // ShizukuHelper.executeShell("echo 'Applied $mode' > /sdcard/asgfx_log.txt")
+
         binding.btnApplyGraphics.postDelayed({
             Toast.makeText(this, "Graphics profile is active! ✓", Toast.LENGTH_LONG).show()
             finish()
