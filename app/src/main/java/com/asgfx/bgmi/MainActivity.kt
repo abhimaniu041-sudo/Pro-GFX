@@ -48,20 +48,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
-        // Floating Panel Start Logic
         binding.btnStartOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                 startActivity(intent)
-                Toast.makeText(this, "Please allow overlay permission", Toast.LENGTH_SHORT).show()
             } else {
                 startService(Intent(this, FloatingOverlayService::class.java))
                 Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
             }
         }
-        
-        binding.btnCoreUtility.setOnClickListener {
+
+        // Agar XML mein ID 'btnCoreUtility' nahi hai toh ye error dega. 
+        // Isliye button clicks ko dhyan se check karein.
+        binding.btnGraphics.setOnLongClickListener {
             startActivity(Intent(this, CoreUtilityActivity::class.java))
+            true
         }
     }
 }
