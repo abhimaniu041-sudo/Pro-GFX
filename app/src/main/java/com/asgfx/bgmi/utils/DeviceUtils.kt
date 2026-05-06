@@ -3,10 +3,8 @@ package com.asgfx.bgmi.utils
 import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
+import android.os.Environment
 import android.os.StatFs
-import android.view.WindowManager
-import java.io.File
 
 object DeviceUtils {
 
@@ -23,8 +21,8 @@ object DeviceUtils {
         val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memInfo = ActivityManager.MemoryInfo()
         actManager.getMemoryInfo(memInfo)
-        val totalMemory = memInfo.totalMem / (1024 * 1024 * 1024.0)
-        return String.format("%.1f GB", totalMemory)
+        val totalGB = memInfo.totalMem.toDouble() / (1024 * 1024 * 1024)
+        return String.format("%.1f GB", totalGB)
     }
 
     fun getPerformanceTier(context: Context): String {
@@ -32,6 +30,7 @@ object DeviceUtils {
         val memInfo = ActivityManager.MemoryInfo()
         actManager.getMemoryInfo(memInfo)
         val ramGB = memInfo.totalMem / (1024 * 1024 * 1024)
+        
         return when {
             ramGB >= 6 -> "High-end"
             ramGB >= 4 -> "Mid-range"
@@ -40,9 +39,13 @@ object DeviceUtils {
     }
 
     fun getStoragePercent(): Int {
-        val stat = StatFs(System.getProperty("user.dir"))
-        val bytesAvailable = stat.blockSizeLong * stat.availableBlocksLong
-        val bytesTotal = stat.blockSizeLong * stat.blockCountLong
-        return if (bytesTotal > 0) (100 - (bytesAvailable * 100 / bytesTotal)).toInt() else 0
+        return try {
+            val stat = StatFs(Environment.getDataDirectory().path)
+            val available = stat.availableBlocksLong * stat.blockSizeLong
+            val total = stat.blockCountLong * stat.blockSizeLong
+            if (total > 0) (100 - (available * 100 / total)).toInt() else 0
+        } catch (e: Exception) {
+            0
+        }
     }
 }
