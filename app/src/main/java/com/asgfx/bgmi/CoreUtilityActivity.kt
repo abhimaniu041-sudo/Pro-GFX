@@ -20,7 +20,7 @@ class CoreUtilityActivity : AppCompatActivity() {
 
     private fun setupStats() {
         binding.tvSdk.text = "Android Version: SDK ${Build.VERSION.SDK_INT}"
-        // Dummy progress for RAM
+        // Set a safe default or get real percent
         binding.pbRam.progress = DeviceUtils.getStoragePercent()
     }
 }
