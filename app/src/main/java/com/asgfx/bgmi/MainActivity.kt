@@ -42,12 +42,13 @@ class MainActivity : AppCompatActivity() {
         binding.btnRunGame.setOnClickListener {
             val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
             if (launchIntent != null) {
+                Toast.makeText(this, "Launching BGMI...", Toast.LENGTH_SHORT).show()
                 startActivity(launchIntent)
             } else {
                 Toast.makeText(this, "BGMI is not installed!", Toast.LENGTH_SHORT).show()
             }
         }
-        
+
         binding.btnStartOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
@@ -58,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Is line ko check karein, agar XML mein button hai tabhi ye chalega
+        // Long click to open Core Utility settings
         binding.btnRunGame.setOnLongClickListener {
             startActivity(Intent(this, CoreUtilityActivity::class.java))
             true
