@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎨 Graphics Optimization"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Graphics Mode"
+            android:textColor="@color/colorTextSecondary"
+            android:layout_marginBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgGraphics"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            
+            <RadioButton
+                android:id="@+id/rbSmooth"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Smooth Performance (60 FPS)"
+                android:textColor="@color/white"
+                android:buttonTint="@color/colorPrimary"
+                android:background="@color/colorCardBackground"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"
+                android:checked="true"/>
+
+            <RadioButton
+                android:id="@+id/rbBalanced"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="Balanced Mode (Ultra FPS)"
+                android:textColor="@color/white"
+                android:buttonTint="@color/colorPrimary"
+                android:background="@color/colorCardBackground"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"/>
+
+            <RadioButton
+                android:id="@+id/rbHDR"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:text="HDR Ready (High Quality)"
+                android:textColor="@color/white"
+                android:buttonTint="@color/colorPrimary"
+                android:background="@color/colorCardBackground"
+                android:padding="12dp"
+                android:layout_marginBottom="24dp"/>
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Extra Optimizations"
+            android:textColor="@color/colorTextSecondary"
+            android:layout_marginBottom="12dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swAntiLag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Anti-Lag Engine"
+            android:textColor="@color/white"
+            android:thumbTint="@color/colorPrimary"
+            app:trackTint="@color/colorToggleOff"
+            android:padding="16dp"
+            android:checked="true"
+            android:background="@color/colorCardBackground"
+            android:layout_marginBottom="8dp"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/swFpsBoost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="90 FPS Unlocker"
+            android:textColor="@color/white"
+            android:thumbTint="@color/colorPrimary"
+            app:trackTint="@color/colorToggleOff"
+            android:padding="16dp"
+            android:checked="true"
+            android:background="@color/colorCardBackground"
+            android:layout_marginBottom="32dp"/>
+
+        <Button
+            android:id="@+id/btnApplyGraphics"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="⚡ APPLY BEST GRAPHICS"
+            android:backgroundTint="@color/colorPrimary"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+</ScrollView>
