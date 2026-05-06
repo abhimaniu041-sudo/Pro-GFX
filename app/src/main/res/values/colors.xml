@@ -8,6 +8,8 @@
     <color name="colorTextSecondary">#AAAAAA</color>
     <color name="colorSuccess">#00C853</color>
     <color name="colorDanger">#FF1744</color>
+    <color name="colorToggleOn">#FF0080</color>
+    <color name="colorToggleOff">#444444</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 </resources>
