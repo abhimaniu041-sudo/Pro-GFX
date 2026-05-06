@@ -1,7 +1,9 @@
 package com.asgfx.bgmi
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityMainBinding
@@ -47,8 +49,14 @@ class MainActivity : AppCompatActivity() {
         }
         
         binding.btnStartOverlay.setOnClickListener {
-            // Service start logic will be added in Phase 4
-            Toast.makeText(this, "Starting Floating Panel...", Toast.LENGTH_SHORT).show()
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+                startActivity(intent)
+                Toast.makeText(this, "Please allow overlay permission first", Toast.LENGTH_SHORT).show()
+            } else {
+                startService(Intent(this, FloatingOverlayService::class.java))
+                Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
