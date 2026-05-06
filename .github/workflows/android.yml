@@ -21,6 +21,9 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Generate Gradle Wrapper
+      run: gradle wrapper --gradle-version 8.2
+
     - name: Grant Execute Permission for Gradlew
       run: chmod +x gradlew
 
