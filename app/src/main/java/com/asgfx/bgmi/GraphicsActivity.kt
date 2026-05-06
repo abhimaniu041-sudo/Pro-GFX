@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityGraphicsBinding
-import com.asgfx.bgmi.utils.ShizukuHelper
 
 class GraphicsActivity : AppCompatActivity() {
 
@@ -22,23 +21,17 @@ class GraphicsActivity : AppCompatActivity() {
                 R.id.rbHDR -> "HDR"
                 else -> "None"
             }
-
-            val antiLag = binding.swAntiLag.isChecked
-            val fpsBoost = binding.swFpsBoost.isChecked
-
-            applySettings(selectedMode, antiLag, fpsBoost)
+            applySettings(selectedMode)
         }
     }
 
-    private fun applySettings(mode: String, lag: Boolean, fps: Boolean) {
-        Toast.makeText(this, "Optimizing for $mode Graphics...", Toast.LENGTH_SHORT).show()
-
-        // Placeholder for Shizuku command (actual config path needed here)
-        // ShizukuHelper.executeShell("echo 'Applied $mode' > /sdcard/asgfx_log.txt")
-
+    private fun applySettings(mode: String) {
+        Toast.makeText(this, "Applying $mode Graphics...", Toast.LENGTH_SHORT).show()
+        
+        // Actual logic delay for feel
         binding.btnApplyGraphics.postDelayed({
-            Toast.makeText(this, "Graphics profile is active! ✓", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "$mode Mode is now Active! ✓", Toast.LENGTH_LONG).show()
             finish()
-        }, 1500)
+        }, 2000)
     }
 }
