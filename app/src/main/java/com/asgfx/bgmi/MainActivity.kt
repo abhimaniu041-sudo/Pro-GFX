@@ -48,15 +48,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
+        // Floating Panel Start Logic
         binding.btnStartOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                 startActivity(intent)
-                Toast.makeText(this, "Please allow overlay permission first", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please allow overlay permission", Toast.LENGTH_SHORT).show()
             } else {
                 startService(Intent(this, FloatingOverlayService::class.java))
                 Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
             }
+        }
+        
+        binding.btnCoreUtility.setOnClickListener {
+            startActivity(Intent(this, CoreUtilityActivity::class.java))
         }
     }
 }
