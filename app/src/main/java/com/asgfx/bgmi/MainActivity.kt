@@ -23,42 +23,31 @@ class MainActivity : AppCompatActivity() {
 
         setupStatus()
         setupClickListeners()
-        initGameLauncher() // Naya Launcher call
+        initGameLauncher()
     }
 
     private fun setupStatus() {
         val isInstalled = DeviceUtils.isBGMIInstalled(this)
         binding.tvBgmiStatus.apply {
-            text = if (isInstalled) "✓ BGMI Ready" else "✗ BGMI Not Found"
+            text = if (isInstalled) "✓ System Optimized" else "✗ BGMI Not Found"
             setTextColor(if (isInstalled) getColor(R.color.colorSuccess) else getColor(R.color.colorDanger))
         }
     }
 
     private fun initGameLauncher() {
-        val pm = packageManager
-        val packages = pm.getInstalledApplications(android.content.pm.PackageManager.GET_META_DATA)
-        val gameList = mutableListOf<GameModel>()
-
-        for (app in packages) {
-            // Games ya Battle Royale apps detect karein
-            val isGame = (app.flags and android.content.pm.ApplicationInfo.FLAG_IS_GAME != 0) || 
-                         app.packageName.contains("pubg") || 
-                         app.packageName.contains("freefire") ||
-                         app.packageName.contains("cod")
-            
-            if (isGame && pm.getLaunchIntentForPackage(app.packageName) != null) {
-                gameList.add(GameModel(
-                    pm.getApplicationLabel(app).toString(),
-                    app.packageName,
-                    pm.getApplicationIcon(app)
-                ))
+        val games = DeviceUtils.getInstalledGamesInfo(this)
+        
+        binding.rvGameList.apply {
+            // Horizontal list setup
+            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = GameAdapter(games) { pkgName ->
+                val launchIntent = packageManager.getLaunchIntentForPackage(pkgName)
+                if (launchIntent != null) {
+                    startActivity(launchIntent)
+                } else {
+                    Toast.makeText(this@MainActivity, "Launch failed!", Toast.LENGTH_SHORT).show()
+                }
             }
-        }
-
-        binding.rvGameList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvGameList.adapter = GameAdapter(gameList) { pkg ->
-            val intent = pm.getLaunchIntentForPackage(pkg)
-            if (intent != null) startActivity(intent)
         }
     }
 
@@ -72,9 +61,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnRunGame.setOnClickListener {
-            val games = DeviceUtils.getAllInstalledGames(this)
-            if (games.isNotEmpty()) {
-                val intent = packageManager.getLaunchIntentForPackage(games[0])
+            val installedGames = DeviceUtils.getAllInstalledGames(this)
+            if (installedGames.isNotEmpty()) {
+                // BGMI ko pehle dhundo, nahi toh pehla game launch karo
+                val target = if (installedGames.contains("com.pubg.imobile")) "com.pubg.imobile" else installedGames[0]
+                val intent = packageManager.getLaunchIntentForPackage(target)
                 if (intent != null) startActivity(intent)
             } else {
                 Toast.makeText(this, "No games found!", Toast.LENGTH_SHORT).show()
