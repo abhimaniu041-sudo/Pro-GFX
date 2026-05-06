@@ -10,7 +10,6 @@ import com.asgfx.bgmi.models.GameModel
 
 object DeviceUtils {
 
-    // 1. Check specific BGMI installation
     fun isBGMIInstalled(context: Context): Boolean {
         return try {
             context.packageManager.getPackageInfo("com.pubg.imobile", 0)
@@ -20,39 +19,47 @@ object DeviceUtils {
         }
     }
 
-    // 2. NEW: Get full details of all installed games for the Launcher
     fun getInstalledGamesInfo(context: Context): List<GameModel> {
         val pm = context.packageManager
         val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
         val gameList = mutableListOf<GameModel>()
 
         for (appInfo in packages) {
-            // Filter logic for games
-            val isGame = (appInfo.flags and ApplicationInfo.FLAG_IS_GAME != 0) || 
-                         appInfo.packageName.contains("pubg") || 
-                         appInfo.packageName.contains("freefire") || 
-                         appInfo.packageName.contains("cod") ||
-                         appInfo.packageName.contains("mobile")
+            // Android System ka game flag check karein
+            val isSystemGame = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                appInfo.category == ApplicationInfo.CATEGORY_GAME
+            } else {
+                (appInfo.flags and ApplicationInfo.FLAG_IS_GAME) != 0
+            }
 
-            if (isGame && pm.getLaunchIntentForPackage(appInfo.packageName) != null) {
-                gameList.add(
-                    GameModel(
-                        name = pm.getApplicationLabel(appInfo).toString(),
-                        packageName = appInfo.packageName,
-                        icon = pm.getApplicationIcon(appInfo)
+            // Keyword based filter (Backup ke liye)
+            val isGameByPackage = appInfo.packageName.contains("pubg") || 
+                                 appInfo.packageName.contains("freefire") || 
+                                 appInfo.packageName.contains("cod") ||
+                                 appInfo.packageName.contains("mobile") ||
+                                 appInfo.packageName.contains("tencent")
+
+            // Agar game hai aur uska icon/launcher hai
+            if ((isSystemGame || isGameByPackage) && pm.getLaunchIntentForPackage(appInfo.packageName) != null) {
+                // Duplicate check (apne hi app ko list mein na dikhayein)
+                if (appInfo.packageName != context.packageName) {
+                    gameList.add(
+                        GameModel(
+                            name = pm.getApplicationLabel(appInfo).toString(),
+                            packageName = appInfo.packageName,
+                            icon = pm.getApplicationIcon(appInfo)
+                        )
                     )
-                )
+                }
             }
         }
-        return gameList
+        return gameList.distinctBy { it.packageName }
     }
 
-    // 3. Simple list of package names (for Smart Launch button)
     fun getAllInstalledGames(context: Context): List<String> {
         return getInstalledGamesInfo(context).map { it.packageName }
     }
 
-    // 4. RAM Information
     fun getTotalRAM(context: Context): String {
         val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memInfo = ActivityManager.MemoryInfo()
@@ -61,7 +68,6 @@ object DeviceUtils {
         return String.format("%.1f GB", totalGB)
     }
 
-    // 5. Performance Tier
     fun getPerformanceTier(context: Context): String {
         val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val memInfo = ActivityManager.MemoryInfo()
@@ -74,7 +80,6 @@ object DeviceUtils {
         }
     }
 
-    // 6. Storage Status
     fun getStoragePercent(): Int {
         return try {
             val stat = StatFs(Environment.getDataDirectory().path)
