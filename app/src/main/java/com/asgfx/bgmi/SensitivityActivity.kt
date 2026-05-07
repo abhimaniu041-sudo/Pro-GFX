@@ -1,7 +1,7 @@
 package com.asgfx.bgmi
 
 import android.os.Bundle
-import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivitySensitivityBinding
@@ -18,13 +18,10 @@ class SensitivityActivity : AppCompatActivity() {
             binding = ActivitySensitivityBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
-            val model = android.os.Build.MODEL
             val tier = DeviceUtils.getPerformanceTier(this)
+            binding.tvDeviceInfo.text = "Device: ${android.os.Build.MODEL}"
+            binding.tvDeviceTier.text = "Optimization: $tier"
 
-            binding.tvDeviceInfo.text = "Device: $model"
-            binding.tvDeviceTier.text = "Tier: $tier"
-
-            // Default calculation
             calculateSensitivity(tier, true)
 
             binding.btnGyro.setOnClickListener {
@@ -40,14 +37,12 @@ class SensitivityActivity : AppCompatActivity() {
             }
 
             binding.btnLoadBest.setOnClickListener {
-                calculateSensitivity(tier, isGyroSelected)
-                Toast.makeText(this, "Optimized Profile Applied!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Sensitivity Applied!", Toast.LENGTH_SHORT).show()
             }
 
         } catch (e: Exception) {
-            Log.e("GFX_ERROR", "Crash in SensitivityActivity: ${e.message}")
-            Toast.makeText(this, "Something went wrong. Checking resources...", Toast.LENGTH_LONG).show()
-            finish() // Crash hone se pehle gracefully close kar dega
+            Toast.makeText(this, "Layout ID Mismatch! Please check XML.", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
 
@@ -58,6 +53,7 @@ class SensitivityActivity : AppCompatActivity() {
             else -> 1.25
         }
 
+        // Checking each view safely to prevent crash
         try {
             if (gyro) {
                 binding.tvTppNoScope.text = "${(350 * mult).toInt()}%"
@@ -65,29 +61,22 @@ class SensitivityActivity : AppCompatActivity() {
                 binding.tv2x.text = "${(280 * mult).toInt()}%"
                 binding.tv3x.text = "${(245 * mult).toInt()}%"
                 binding.tv4x.text = "${(210 * mult).toInt()}%"
-                binding.tv6x.text = "${(115 * mult).toInt()}%"
-                binding.tv8x.text = "${(90 * mult).toInt()}%"
+                binding.tv6x.text = "${(110 * mult).toInt()}%"
+                binding.tv8x.text = "${(85 * mult).toInt()}%"
             } else {
                 binding.tvTppNoScope.text = "${(120 * mult).toInt()}%"
                 binding.tvRedDot.text = "${(60 * mult).toInt()}%"
-                binding.tv2x.text = "${(36 * mult).toInt()}%"
+                binding.tv2x.text = "${(35 * mult).toInt()}%"
                 binding.tv3x.text = "${(26 * mult).toInt()}%"
-                binding.tv4x.text = "${(20 * mult).toInt()}%"
+                binding.tv4x.text = "${(18 * mult).toInt()}%"
                 binding.tv6x.text = "${(12 * mult).toInt()}%"
                 binding.tv8x.text = "${(10 * mult).toInt()}%"
             }
-        } catch (e: Exception) {
-            Log.e("GFX_ERROR", "UI Binding missing: ${e.message}")
-        }
+        } catch (e: Exception) { }
     }
 
     private fun updateTabUI() {
-        if (isGyroSelected) {
-            binding.btnGyro.alpha = 1.0f
-            binding.btnNonGyro.alpha = 0.6f
-        } else {
-            binding.btnNonGyro.alpha = 1.0f
-            binding.btnGyro.alpha = 0.6f
-        }
+        binding.btnGyro.alpha = if (isGyroSelected) 1.0f else 0.5f
+        binding.btnNonGyro.alpha = if (isGyroSelected) 0.5f else 1.0f
     }
 }
