@@ -32,6 +32,8 @@
         <activity android:name=".LoginActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".GraphicsActivity" android:exported="false" />
+        
+        <activity android:name=".SensitivityActivity" android:exported="false" />
 
-        </application>
+    </application>
 </manifest>
