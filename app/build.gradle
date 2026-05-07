@@ -11,8 +11,10 @@ android {
         applicationId "com.asgfx.bgmi"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        
+        // 🔥 FORCE CLEAN BUILD: Version code aur name badal diya hai
+        versionCode 2 
+        versionName "1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,7 +46,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // 🔥 Shizuku API (Stable Version for Android 11-14)
+    // 🔥 SHIZUKU API: Stable update for Android 11-14
     def shizuku_version = "13.1.0"
     implementation "dev.rikka.shizuku:api:$shizuku_version"
     implementation "dev.rikka.shizuku:provider:$shizuku_version"
