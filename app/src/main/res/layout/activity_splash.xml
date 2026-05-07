@@ -2,9 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
-
-    <LinearLayout
+    android:background="#000000"> <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -62,7 +60,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="35dp"
-        android:text="V1.2 - SAFE AND SECURE"
+        android:text="v1.2 | STEALTH EDITION"
         android:textColor="#222222"
         android:textSize="10sp"
         android:letterSpacing="0.5" />
