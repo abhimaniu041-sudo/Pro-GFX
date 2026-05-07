@@ -17,23 +17,29 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 2 Seconds ka wait
+        // 2.5 Seconds delay for a smoother feel
         Handler(Looper.getMainLooper()).postDelayed({
             
-            // 🔥 SESSION CHECK: Kya user pehle login kar chuka hai?
+            // 🔥 SESSION CHECK
             val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
             val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
 
             if (isLoggedIn) {
-                // Seedha Dashboard par jao aur naam pass karo
+                // User already logged in, go to Dashboard
                 val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("USER_NAME", sharedPref.getString("USER_NAME", "Pro User"))
+                // Passing saved username or default name
+                val savedName = sharedPref.getString("USER_NAME", "ABHIMANIU SHARMA")
+                intent.putExtra("USER_NAME", savedName)
                 startActivity(intent)
             } else {
-                // Agar login nahi hai toh Login page dikhao
+                // No session found, go to Login
                 startActivity(Intent(this, LoginActivity::class.java))
             }
+            
             finish()
-        }, 2000)
+            // Adding a smooth fade transition
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+            
+        }, 2500)
     }
 }
