@@ -1,12 +1,7 @@
 package com.asgfx.bgmi
 
-import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
-import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivitySensitivityBinding
 import com.asgfx.bgmi.utils.DeviceUtils
@@ -14,76 +9,77 @@ import com.asgfx.bgmi.utils.DeviceUtils
 class SensitivityActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySensitivityBinding
-    private var isGyroMode = true
+    private var isGyroSelected = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySensitivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        detectDevice()
-        updateValues()
+        // 1. Device info detect aur display karein
+        val model = android.os.Build.MODEL
+        val ram = DeviceUtils.getTotalRAM(this)
+        val tier = DeviceUtils.getPerformanceTier(this)
 
+        binding.tvDeviceInfo.text = "Device: $model | RAM: $ram"
+        binding.tvDeviceTier.text = "Tier: $tier"
+
+        // Default sensitivity load karein
+        calculateSensitivity(tier, true)
+
+        // 2. Tab switching logic (Gyro vs Non-Gyro)
         binding.btnGyro.setOnClickListener {
-            isGyroMode = true
-            binding.btnGyro.backgroundTintList = getColorStateList(R.color.colorPrimary)
-            binding.btnNonGyro.backgroundTintList = getColorStateList(R.color.colorCardBackground)
-            updateValues()
+            isGyroSelected = true
+            updateTabUI()
+            calculateSensitivity(tier, true)
         }
 
         binding.btnNonGyro.setOnClickListener {
-            isGyroMode = false
-            binding.btnNonGyro.backgroundTintList = getColorStateList(R.color.colorPrimary)
-            binding.btnGyro.backgroundTintList = getColorStateList(R.color.colorCardBackground)
-            updateValues()
+            isGyroSelected = false
+            updateTabUI()
+            calculateSensitivity(tier, false)
         }
 
-        binding.btnApplySensitivity.setOnClickListener {
-            Toast.makeText(this, "Sensitivity Profile Active! ✓", Toast.LENGTH_LONG).show()
-            finish()
+        // 3. Load Best Button logic
+        binding.btnLoadBest.setOnClickListener {
+            calculateSensitivity(tier, isGyroSelected)
+            Toast.makeText(this, "Optimized for $model", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun detectDevice() {
-        val model = Build.MODEL
-        val ram = DeviceUtils.getTotalRAM(this)
-        val tier = DeviceUtils.getPerformanceTier(this)
-        
-        binding.tvDeviceInfo.text = "Device: $model | RAM: $ram"
-        binding.tvDeviceTier.text = "Tier: $tier"
-    }
+    private fun calculateSensitivity(tier: String, gyro: Boolean) {
+        // No-Recoil Algorithm based on Tier
+        val multiplier = when (tier) {
+            "High-end" -> 0.95  // Stable control for powerful sensors
+            "Mid-range" -> 1.1  // Balanced
+            else -> 1.25        // Higher sensitivity for low-end touch response
+        }
 
-    private fun updateValues() {
-        binding.containerValues.removeAllViews()
-        val values = if (isGyroMode) {
-            mapOf("TPP No Scope" to "330%", "Red Dot" to "345%", "2x Scope" to "315%", "3x Scope" to "300%", "4x Scope" to "276%")
+        if (gyro) {
+            // Best Gyro No-Recoil values
+            binding.tvTppNoScope.text = "${(350 * multiplier).toInt()}%"
+            binding.tvRedDot.text = "${(320 * multiplier).toInt()}%"
+            binding.tv2x.text = "${(280 * multiplier).toInt()}%"
+            binding.tv3x.text = "${(245 * multiplier).toInt()}%"
+            binding.tv4x.text = "${(210 * multiplier).toInt()}%"
         } else {
-            mapOf("TPP No Scope" to "180%", "Red Dot" to "185%", "2x Scope" to "165%", "3x Scope" to "155%", "4x Scope" to "140%")
+            // Best Non-Gyro (Ads) values
+            binding.tvTppNoScope.text = "${(120 * multiplier).toInt()}%"
+            binding.tvRedDot.text = "${(60 * multiplier).toInt()}%"
+            binding.tv2x.text = "${(35 * multiplier).toInt()}%"
+            binding.tv3x.text = "${(27 * multiplier).toInt()}%"
+            binding.tv4x.text = "${(18 * multiplier).toInt()}%"
         }
+    }
 
-        for ((label, value) in values) {
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                setPadding(0, 8, 0, 8)
-            }
-
-            val tvLabel = TextView(this).apply {
-                text = label
-                setTextColor(getColor(R.color.white))
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            }
-
-            val tvValue = TextView(this).apply {
-                text = value
-                setTextColor(getColor(R.color.colorPrimary))
-                setTypeface(null, Typeface.BOLD)
-                gravity = Gravity.END
-            }
-
-            row.addView(tvLabel)
-            row.addView(tvValue)
-            binding.containerValues.addView(row)
+    private fun updateTabUI() {
+        // Blue stealth look for active tab
+        if (isGyroSelected) {
+            binding.btnGyro.setBackgroundResource(R.drawable.premium_primary_bg)
+            binding.btnNonGyro.setBackgroundResource(R.drawable.premium_button_bg)
+        } else {
+            binding.btnNonGyro.setBackgroundResource(R.drawable.premium_primary_bg)
+            binding.btnGyro.setBackgroundResource(R.drawable.premium_button_bg)
         }
     }
 }
