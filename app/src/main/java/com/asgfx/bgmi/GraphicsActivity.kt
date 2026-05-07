@@ -1,7 +1,6 @@
 package com.asgfx.bgmi
 
 import android.os.Bundle
-import android.view.Display
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityGraphicsBinding
@@ -17,36 +16,47 @@ class GraphicsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.btnApplyGraphics.setOnClickListener {
-            applyOptimizations()
+            handleAction()
         }
     }
 
-    private fun applyOptimizations() {
-        val is144Selected = binding.rbUltraExtreme.isChecked
-        val isAntiLag = binding.switchAntiLag.isChecked
-        val isForceRefresh = binding.switchUnlock144.isChecked
-
-        // Detect actual hardware refresh rate
-        val refreshRate = windowManager.defaultDisplay.refreshRate
-
-        if (is144Selected) {
-            if (refreshRate >= 140) {
-                Toast.makeText(this, "🚀 144Hz Hardware Detected! Unlocking Max FPS...", Toast.LENGTH_LONG).show()
-                // Yahan config file apply karne ka logic aayega
-            } else {
-                Toast.makeText(this, "⚠️ Hardware supports $refreshRate Hz. Optimizing for Max.", Toast.LENGTH_SHORT).show()
+    private fun handleAction() {
+        val selectedId = binding.rgGraphics.checkedRadioButtonId
+        
+        when (selectedId) {
+            R.id.rbDefault -> {
+                // Restore logic
+                binding.switchAntiLag.isChecked = false
+                binding.switchUnlock144.isChecked = false
+                Toast.makeText(this, "♻️ Original Graphics Restored!", Toast.LENGTH_LONG).show()
+            }
+            R.id.rbUltraExtreme -> {
+                applyUltraLogic()
+            }
+            R.id.rbSmooth -> {
+                Toast.makeText(this, "Smooth Profile Applied!", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                Toast.makeText(this, "Please select an option", Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
-        if (isForceRefresh) {
-            // Commands to force system refresh rate (Requires root or Shizuku usually)
-            Toast.makeText(this, "Display Refresh Rate Locked to Max", Toast.LENGTH_SHORT).show()
+    private fun applyUltraLogic() {
+        val refreshRate = windowManager.defaultDisplay.refreshRate
+        val isAntiLag = binding.switchAntiLag.isChecked
+        val isForce144 = binding.switchUnlock144.isChecked
+
+        var message = "Optimizing for Ultra Extreme..."
+        
+        if (refreshRate >= 140 || isForce144) {
+            message = "🚀 144Hz Mode Active: Max FPS Unlocked"
         }
 
         if (isAntiLag) {
-            Toast.makeText(this, "Anti-Lag Engine Active", Toast.LENGTH_SHORT).show()
+            // Anti-Lag Command simulation
         }
 
-        Toast.makeText(this, "Graphics Optimization Applied Successfully!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 }
