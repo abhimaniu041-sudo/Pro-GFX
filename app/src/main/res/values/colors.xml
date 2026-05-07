@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FF0080</color>
-    <color name="colorBackground">#000000</color>
-    <color name="colorCardBackground">#111111</color>
-    <color name="colorCardBorder">#FF0080</color>
-    <color name="colorText">#FFFFFF</color>
-    <color name="colorTextSecondary">#AAAAAA</color>
-    <color name="colorSuccess">#00C853</color>
-    <color name="colorDanger">#FF1744</color>
-    <color name="colorToggleOn">#FF0080</color>
+    <color name="colorPrimary">#0084FF</color> <color name="colorBackground">#0D0D0D</color> <color name="colorCardBackground">#161616</color> <color name="colorCardBorder">#2A2A2A</color> <color name="colorText">#FFFFFF</color>
+    <color name="colorTextSecondary">#9E9E9E</color>
+    <color name="colorSuccess">#00E676</color> <color name="colorDanger">#FF1744</color>
+    <color name="colorToggleOn">#0084FF</color>
     <color name="colorToggleOff">#444444</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
