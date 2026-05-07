@@ -12,52 +12,68 @@ class GraphicsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
+    // Listener jo connection aate hi binder ko "Catch" kar lega
+    private val binderListener = Shizuku.OnBinderReceivedListener {
+        checkShizukuStatus(false)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
-            // Startup par sirf ping karenge, koi bhari listener nahi
-            if (Shizuku.pingBinder()) {
-                // Connection hai
-            }
+            // ✅ Connection detect karne ke liye sticky listener
+            Shizuku.addBinderReceivedListenerSticky(binderListener)
 
             binding.btnApplySettings.setOnClickListener {
-                runGraphicsProcess()
+                checkShizukuStatus(true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun runGraphicsProcess() {
+    private fun checkShizukuStatus(isManualClick: Boolean) {
         try {
             if (Shizuku.pingBinder()) {
                 if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    applyFinalSettings()
+                    if (isManualClick) applyFinalGraphics()
                 } else {
-                    Toast.makeText(this, "🔑 Requesting Permission...", Toast.LENGTH_SHORT).show()
+                    // Agar authorized hai par session expired hai
                     Shizuku.requestPermission(SHIZUKU_CODE)
                 }
             } else {
-                Toast.makeText(this, "📢 Shizuku Binder not connected! Open Shizuku app first.", Toast.LENGTH_LONG).show()
+                if (isManualClick) {
+                    Toast.makeText(this, "📢 Shizuku Binder not connected! Restart Shizuku app.", Toast.LENGTH_LONG).show()
+                }
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            if (isManualClick) Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun applyFinalSettings() {
+    private fun applyFinalGraphics() {
         val isUltra = binding.rbUltraExtreme.isChecked
+        val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
 
-        if (!isUltra && !binding.rbSmooth.isChecked && !isRestore) {
-            Toast.makeText(this, "⚠️ Please select an option!", Toast.LENGTH_SHORT).show()
+        if (!isUltra && !isSmooth && !isRestore) {
+            Toast.makeText(this, "⚠️ Select Graphics Mode First!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val msg = if (isRestore) "♻️ Settings Restored!" else "🚀 Graphics Optimized!"
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+        val modeText = when {
+            isRestore -> "♻️ Original Graphics Restored"
+            isUltra -> "🚀 144FPS Mode Applied Successfully!"
+            else -> "✅ Smooth Profile Applied!"
+        }
+
+        Toast.makeText(this, modeText, Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Shizuku.removeBinderReceivedListener(binderListener)
     }
 }
