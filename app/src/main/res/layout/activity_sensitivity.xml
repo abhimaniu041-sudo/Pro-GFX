@@ -12,6 +12,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🎯 Sensitivity Tuner"
@@ -35,11 +36,13 @@
                     android:id="@+id/tvDeviceInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Detecting..."
                     android:textColor="@color/white" />
                 <TextView
                     android:id="@+id/tvDeviceTier"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="Analyzing..."
                     android:textColor="@color/colorPrimary"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -82,38 +85,38 @@
                 android:padding="8dp">
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="TPP No Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tvTppNoScope" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="TPP No Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tvTppNoScope" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="Red Dot / Holo" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tvRedDot" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="Red Dot / Holo" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tvRedDot" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="2x Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tv2x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="2x Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tv2x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="3x Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tv3x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="3x Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tv3x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="4x Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tv4x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="4x Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tv4x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="6x Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tv6x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="6x Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tv6x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="8x Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
-                    <TextView android:id="@+id/tv8x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
+                    <TextView android:text="8x Scope" android:textColor="@color/colorTextSecondary" />
+                    <TextView android:id="@+id/tv8x" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true" android:text="0%"/>
                 </RelativeLayout>
 
             </LinearLayout>
@@ -123,7 +126,7 @@
             android:id="@+id/btnLoadBest"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:text="⚡ LOAD BEST SENSITIVITY"
             android:textColor="@color/white"
             android:textStyle="bold"
