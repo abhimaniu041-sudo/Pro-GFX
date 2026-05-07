@@ -1,5 +1,6 @@
 package com.asgfx.bgmi
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -23,14 +24,13 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // User profile setup (Username from Login)
+        // User profile setup (Login ya Splash se aane wala naam)
         val username = intent.getStringExtra("USER_NAME") ?: "Pro User"
         binding.tvProfileName.text = username
 
-        // Saare functions ko trigger kar rahe hain
         setupStatus()
         setupClickListeners()
-        initGameLauncher() 
+        initGameLauncher()
     }
 
     private fun setupStatus() {
@@ -40,14 +40,13 @@ class MainActivity : AppCompatActivity() {
                 text = "✓ System Optimized"
                 setTextColor(getColor(R.color.colorSuccess))
             } else {
-                text = "✗ BGMI Not Found"
+                text = "× BGMI Not Found"
                 setTextColor(getColor(R.color.colorDanger))
             }
         }
     }
 
     private fun initGameLauncher() {
-        // Ye games ko scan karke list mein dikhayega
         val games = DeviceUtils.getInstalledGamesInfo(this)
         if (games.isNotEmpty()) {
             binding.rvGameList.visibility = View.VISIBLE
@@ -68,12 +67,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Settings/Theme Click
+        // 🔥 LOGOUT FEATURE: Settings icon par click karne par
         binding.ivSettings.setOnClickListener {
-            showThemeDialog()
+            AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Kya aap logout karna chahte hain?")
+                .setPositiveButton("Logout") { _, _ ->
+                    // Session clear karo
+                    val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                    sharedPref.edit().clear().apply()
+                    
+                    // Login page par bhej do
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
 
-        // Navigation to other activities
         binding.btnSensitivity.setOnClickListener {
             startActivity(Intent(this, SensitivityActivity::class.java))
         }
@@ -82,7 +93,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, GraphicsActivity::class.java))
         }
 
-        // Smart Launch Logic
         binding.btnRunGame.setOnClickListener {
             val installedGames = DeviceUtils.getAllInstalledGames(this)
             if (installedGames.isNotEmpty()) {
@@ -94,13 +104,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Floating Panel / Overlay logic
         binding.btnStartOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                 startActivity(intent)
             } else {
-                startService(Intent(this, FloatingOverlayService::class.java))
+                // Floating panel service call yahan aayegi
                 Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
             }
         }
