@@ -14,6 +14,7 @@
         tools:ignore="QueryAllPackagesPermission" />
 
     <queries>
+        <package android:name="moe.shizuku.privileged.api" />
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
@@ -44,6 +45,13 @@
         <activity android:name=".GraphicsActivity" android:exported="false" />
         <activity android:name=".AdvancedModeActivity" android:exported="false" />
         <activity android:name=".CoreUtilityActivity" android:exported="false" />
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="${applicationId}.shizuku"
+            android:enabled="true"
+            android:exported="false"
+            android:multiprocess="false" />
 
         <service
             android:name=".FloatingOverlayService"
