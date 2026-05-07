@@ -95,44 +95,52 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="24dp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSensitivity"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🎯 Sensitivity Settings"
-            android:backgroundTint="@color/colorCardBackground"
+            android:layout_marginBottom="12dp"
+            android:text="🎯 SENSITIVITY SETTINGS"
             android:textColor="@color/white"
-            android:layout_marginBottom="8dp" />
+            android:background="@drawable/premium_button_bg"
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnGraphics"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🎨 Graphics Optimization"
-            android:backgroundTint="@color/colorCardBackground"
+            android:layout_marginBottom="12dp"
+            android:text="🎨 GRAPHICS OPTIMIZATION"
             android:textColor="@color/white"
-            android:layout_marginBottom="8dp" />
+            android:background="@drawable/premium_button_bg"
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnStartOverlay"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🟣 Show Floating Panel"
-            android:backgroundTint="@color/colorPrimary"
+            android:layout_marginTop="20dp"
+            android:text="🔵 SHOW FLOATING PANEL"
             android:textColor="@color/white"
-            android:layout_marginTop="20dp" />
+            android:background="@drawable/premium_primary_bg"
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnRunGame"
             android:layout_width="match_parent"
             android:layout_height="65dp"
+            android:layout_marginTop="25dp"
             android:text="🚀 SMART LAUNCH"
-            android:backgroundTint="@color/colorSuccess"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:layout_marginTop="30dp" />
+            android:backgroundTint="@color/colorSuccess"
+            android:background="@drawable/premium_button_bg"
+            android:textAllCaps="false"
+            android:textStyle="bold" />
 
     </LinearLayout>
 </ScrollView>
