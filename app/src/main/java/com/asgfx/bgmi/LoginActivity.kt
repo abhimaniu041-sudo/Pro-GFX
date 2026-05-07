@@ -21,7 +21,11 @@ class LoginActivity : AppCompatActivity() {
 
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 Toast.makeText(this, "Welcome $username", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
+                
+                // DATA PASSING LOGIC
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("USER_NAME", username) 
+                startActivity(intent)
                 finish()
             } else {
                 Toast.makeText(this, "Please enter all details", Toast.LENGTH_SHORT).show()
