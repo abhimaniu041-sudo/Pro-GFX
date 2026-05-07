@@ -20,52 +20,58 @@
             android:textStyle="bold"
             android:layout_marginBottom="20dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select Graphics Mode"
-            android:textColor="@color/colorTextSecondary"
-            android:layout_marginBottom="8dp"/>
-
         <RadioGroup
             android:id="@+id/rgGraphics"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            
-            <RadioButton
-                android:id="@+id/rbSmooth"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="Smooth Performance (60 FPS)"
-                android:textColor="@color/white"
-                android:buttonTint="@color/colorPrimary"
-                android:background="@color/colorCardBackground"
-                android:padding="12dp"
-                android:layout_marginBottom="8dp"
-                android:checked="true"/>
+            android:layout_height="wrap_content">
 
-            <RadioButton
-                android:id="@+id/rbBalanced"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="Balanced Mode (Ultra FPS)"
-                android:textColor="@color/white"
-                android:buttonTint="@color/colorPrimary"
-                android:background="@color/colorCardBackground"
-                android:padding="12dp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/colorCardBackground"
+                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="12dp">
+                <RadioButton
+                    android:id="@+id/rbUltraExtreme"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="🚀 Ultra Extreme (144 FPS Unlock)"
+                    android:textColor="@color/colorSuccess"
+                    android:buttonTint="@color/colorSuccess" />
+            </androidx.cardview.widget.CardView>
 
-            <RadioButton
-                android:id="@+id/rbHDR"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="HDR Ready (High Quality)"
-                android:textColor="@color/white"
-                android:buttonTint="@color/colorPrimary"
-                android:background="@color/colorCardBackground"
-                android:padding="12dp"
-                android:layout_marginBottom="24dp"/>
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/colorCardBackground"
+                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="12dp">
+                <RadioButton
+                    android:id="@+id/rbSmooth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Smooth Performance (Stable)"
+                    android:textColor="@color/white"
+                    android:buttonTint="@color/colorPrimary" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/colorCardBackground"
+                app:cardCornerRadius="12dp"
+                android:layout_marginBottom="12dp">
+                <RadioButton
+                    android:id="@+id/rbUltraHdr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Ultra HDR + Cinema Mode"
+                    android:textColor="@color/white"
+                    android:buttonTint="@color/colorPrimary" />
+            </androidx.cardview.widget.CardView>
         </RadioGroup>
 
         <TextView
@@ -73,41 +79,47 @@
             android:layout_height="wrap_content"
             android:text="Extra Optimizations"
             android:textColor="@color/colorTextSecondary"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"/>
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/swAntiLag"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Anti-Lag Engine"
-            android:textColor="@color/white"
-            android:thumbTint="@color/colorPrimary"
-            app:trackTint="@color/colorToggleOff"
-            android:padding="16dp"
-            android:checked="true"
-            android:background="@color/colorCardBackground"
-            android:layout_marginBottom="8dp"/>
+            app:cardBackgroundColor="@color/colorCardBackground"
+            app:cardCornerRadius="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+                
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchAntiLag"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Anti-Lag Engine"
+                    android:textColor="@color/white"
+                    android:padding="12dp" />
 
-        <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/swFpsBoost"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="90 FPS Unlocker"
-            android:textColor="@color/white"
-            android:thumbTint="@color/colorPrimary"
-            app:trackTint="@color/colorToggleOff"
-            android:padding="16dp"
-            android:checked="true"
-            android:background="@color/colorCardBackground"
-            android:layout_marginBottom="32dp"/>
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switchUnlock144"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Force 144Hz Refresh Rate"
+                    android:textColor="@color/white"
+                    android:padding="12dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnApplyGraphics"
             android:layout_width="match_parent"
             android:layout_height="60dp"
+            android:layout_marginTop="30dp"
             android:text="⚡ APPLY BEST GRAPHICS"
-            android:backgroundTint="@color/colorPrimary"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:background="@drawable/premium_primary_bg" />
 
     </LinearLayout>
 </ScrollView>
