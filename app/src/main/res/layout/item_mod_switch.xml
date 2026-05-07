@@ -10,11 +10,14 @@
         android:id="@+id/tvModName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MOD 1"
+        android:text="MOD File"
         android:textColor="#FFFFFF"
-        android:textSize="13sp"
+        android:textSize="12sp"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/swModApply"
+        android:ellipsize="end"
+        android:maxLines="1"/>
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/swModApply"
@@ -22,7 +25,5 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:thumbTint="#00E5FF"
-        android:trackTint="#3300E5FF" />
-
+        android:thumbTint="#00E5FF" />
 </RelativeLayout>
