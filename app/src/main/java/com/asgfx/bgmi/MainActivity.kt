@@ -23,12 +23,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // User profile setup (Username from Login)
         val username = intent.getStringExtra("USER_NAME") ?: "Pro User"
         binding.tvProfileName.text = username
 
+        // Saare functions ko trigger kar rahe hain
         setupStatus()
         setupClickListeners()
-        initGameLauncher()
+        initGameLauncher() 
     }
 
     private fun setupStatus() {
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initGameLauncher() {
+        // Ye games ko scan karke list mein dikhayega
         val games = DeviceUtils.getInstalledGamesInfo(this)
         if (games.isNotEmpty()) {
             binding.rvGameList.visibility = View.VISIBLE
@@ -52,7 +55,11 @@ class MainActivity : AppCompatActivity() {
                 layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
                 adapter = GameAdapter(games) { pkgName ->
                     val launchIntent = packageManager.getLaunchIntentForPackage(pkgName)
-                    if (launchIntent != null) startActivity(launchIntent)
+                    if (launchIntent != null) {
+                        startActivity(launchIntent)
+                    } else {
+                        Toast.makeText(this@MainActivity, "App cannot be launched", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         } else {
@@ -61,8 +68,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        binding.ivSettings.setOnClickListener { showThemeDialog() }
+        // Settings/Theme Click
+        binding.ivSettings.setOnClickListener {
+            showThemeDialog()
+        }
 
+        // Navigation to other activities
         binding.btnSensitivity.setOnClickListener {
             startActivity(Intent(this, SensitivityActivity::class.java))
         }
@@ -71,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, GraphicsActivity::class.java))
         }
 
+        // Smart Launch Logic
         binding.btnRunGame.setOnClickListener {
             val installedGames = DeviceUtils.getAllInstalledGames(this)
             if (installedGames.isNotEmpty()) {
@@ -78,10 +90,11 @@ class MainActivity : AppCompatActivity() {
                 val intent = packageManager.getLaunchIntentForPackage(target)
                 if (intent != null) startActivity(intent)
             } else {
-                Toast.makeText(this, "No games found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No games found to launch", Toast.LENGTH_SHORT).show()
             }
         }
 
+        // Floating Panel / Overlay logic
         binding.btnStartOverlay.setOnClickListener {
             if (!Settings.canDrawOverlays(this)) {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
