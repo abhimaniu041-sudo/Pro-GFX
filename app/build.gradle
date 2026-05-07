@@ -12,9 +12,9 @@ android {
         minSdk 26
         targetSdk 34
         
-        // 🔥 FORCE CLEAN BUILD: Version code aur name badal diya hai
-        versionCode 2 
-        versionName "1.1"
+        // 🔥 Version 3 taaki system ise fresh install maane
+        versionCode 3
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -46,12 +46,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // 🔥 SHIZUKU API: Stable update for Android 11-14
-    def shizuku_version = "13.1.0"
-    implementation "dev.rikka.shizuku:api:$shizuku_version"
-    implementation "dev.rikka.shizuku:provider:$shizuku_version"
+    // 🔥 SHIZUKU API: Is version ko fixed rakhein
+    implementation "dev.rikka.shizuku:api:13.1.0"
+    implementation "dev.rikka.shizuku:provider:13.1.0"
 
-    // JSON & ViewPager
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
 }
