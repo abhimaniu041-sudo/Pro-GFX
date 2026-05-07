@@ -23,7 +23,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // User profile setup
         val username = intent.getStringExtra("USER_NAME") ?: "Pro User"
         binding.tvProfileName.text = username
 
@@ -62,9 +61,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        binding.ivSettings.setOnClickListener {
-            showThemeDialog()
-        }
+        binding.ivSettings.setOnClickListener { showThemeDialog() }
 
         binding.btnSensitivity.setOnClickListener {
             startActivity(Intent(this, SensitivityActivity::class.java))
@@ -81,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                 val intent = packageManager.getLaunchIntentForPackage(target)
                 if (intent != null) startActivity(intent)
             } else {
-                Toast.makeText(this, "No games found to launch", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No games found", Toast.LENGTH_SHORT).show()
             }
         }
 
