@@ -16,39 +16,48 @@ class GraphicsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            // Null-safe inflation
             _binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
             binding.btnApplySettings.setOnClickListener {
-                handleApply()
+                handleShizukuProcess()
             }
         } catch (e: Exception) {
-            // Agar UI crash ho toh message dikhega instead of closing
-            Toast.makeText(this, "UI Load Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "UI Error: ${e.message}", Toast.LENGTH_LONG).show()
             finish()
         }
     }
 
-    private fun handleApply() {
-        if (!Shizuku.pingBinder()) {
-            Toast.makeText(this, "📢 Shizuku not running!", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-            executeLogic()
-        } else {
-            Shizuku.requestPermission(SHIZUKU_CODE)
+    private fun handleShizukuProcess() {
+        try {
+            // Step 1: Check binder status
+            if (Shizuku.pingBinder()) {
+                // Step 2: Check or Request Permission
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    applyGraphics()
+                } else {
+                    Toast.makeText(this, "🔑 Requesting Shizuku Permission...", Toast.LENGTH_SHORT).show()
+                    Shizuku.requestPermission(SHIZUKU_CODE)
+                }
+            } else {
+                Toast.makeText(this, "📢 Shizuku not running! Please start Shizuku app.", Toast.LENGTH_LONG).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "Service Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun executeLogic() {
+    private fun applyGraphics() {
         val isUltra = binding.rbUltraExtreme.isChecked
         val isRestore = binding.rbRestore.isChecked
         
-        val mode = if (isRestore) "♻️ Default" else if (isUltra) "🚀 144FPS" else "✅ Smooth"
-        Toast.makeText(this, "$mode Applied Successfully!", Toast.LENGTH_LONG).show()
+        val mode = when {
+            isRestore -> "♻️ Default Settings Restored"
+            isUltra -> "🚀 144FPS Ultra Applied"
+            else -> "✅ Smooth Performance Applied"
+        }
+        
+        Toast.makeText(this, mode, Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroy() {
