@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityGraphicsBinding
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 import android.content.pm.PackageManager
 
 class GraphicsActivity : AppCompatActivity() {
@@ -13,14 +12,19 @@ class GraphicsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
+    // Listener ko variable mein rakhein taaki remove kar sakein
+    private val binderListener = Shizuku.OnBinderReceivedListener {
+        // Shizuku connected - Yahan aap initialization kar sakte hain agar zaroorat ho
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
-            // ✅ YEH LINE ADD KARO — Shizuku ko initialize karta hai
-            ShizukuProvider.requestBinderForActivity(this)
+            // ✅ FIXED: Purani line hata kar naya listener add kiya
+            Shizuku.addBinderReceivedListenerSticky(binderListener)
 
             binding.btnApplySettings.setOnClickListener {
                 checkAndRun()
@@ -46,7 +50,6 @@ class GraphicsActivity : AppCompatActivity() {
                 ).show()
             }
         } catch (e: Exception) {
-            // Shizuku not installed
             Toast.makeText(this, "Shizuku error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
@@ -55,21 +58,26 @@ class GraphicsActivity : AppCompatActivity() {
         val isUltra = binding.rbUltraExtreme.isChecked
         val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
-        val antiLag = binding.switchAntiLag.isChecked
-        val force144 = binding.switchUnlock144.isChecked
-
+        val antilag = binding.switchAntiLag.isChecked
+        
         if (!isUltra && !isSmooth && !isRestore) {
             Toast.makeText(this, "⚠️ Please select a Graphics Mode!", Toast.LENGTH_SHORT).show()
             return
         }
 
         val modeText = when {
-            isRestore -> "🔄 Default Graphics Restored"
+            isRestore -> "♻️ Default Graphics Restored"
             isUltra -> "🚀 144FPS Ultra Mode Applied"
             else -> "✅ Smooth Profile Applied"
         }
 
-        val lagText = if (antiLag) " + Anti-Lag ON" else ""
+        val lagText = if (antilag) " + Anti-Lag ON" else ""
         Toast.makeText(this, "$modeText$lagText", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // ✅ Listener remove karna achhi practice hai
+        Shizuku.removeBinderReceivedListener(binderListener)
     }
 }
