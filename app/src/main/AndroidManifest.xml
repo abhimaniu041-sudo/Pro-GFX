@@ -9,18 +9,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent>
-    </queries>
 
     <application
         android:allowBackup="true"
-        android:label="Pro GFX"
         android:icon="@drawable/ic_launcher"
+        android:label="Pro GFX"
         android:roundIcon="@drawable/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProGFX">
@@ -35,14 +28,17 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".LoginActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".SensitivityActivity" android:exported="false" />
-        <activity android:name=".GraphicsActivity" android:exported="false" />
-        <activity android:name=".AdvancedModeActivity" android:exported="false" />
-        <activity android:name=".CoreUtilityActivity" android:exported="false" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".SensitivityActivity" />
+        <activity android:name=".GraphicsActivity" />
+        <activity android:name=".AdvancedModeActivity" />
+        <activity android:name=".CoreUtilityActivity" />
 
-        <service android:name=".FloatingOverlayService" android:enabled="true" android:exported="false" />
+        <service 
+            android:name=".FloatingOverlayService" 
+            android:enabled="true" 
+            android:exported="false" />
 
     </application>
 </manifest>
