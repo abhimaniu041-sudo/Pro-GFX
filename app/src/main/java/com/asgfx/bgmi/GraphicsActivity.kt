@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.asgfx.bgmi.databinding.ActivityGraphicsBinding
 import rikka.shizuku.Shizuku
+import rikka.shizuku.ShizukuProvider
 import android.content.pm.PackageManager
 
 class GraphicsActivity : AppCompatActivity() {
@@ -18,6 +19,9 @@ class GraphicsActivity : AppCompatActivity() {
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // ✅ YEH LINE ADD KARO — Shizuku ko initialize karta hai
+            ShizukuProvider.requestBinderForActivity(this)
+
             binding.btnApplySettings.setOnClickListener {
                 checkAndRun()
             }
@@ -27,15 +31,23 @@ class GraphicsActivity : AppCompatActivity() {
     }
 
     private fun checkAndRun() {
-        if (Shizuku.pingBinder()) {
-            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                applyFinalGraphics()
+        try {
+            if (Shizuku.pingBinder()) {
+                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                    applyFinalGraphics()
+                } else {
+                    Shizuku.requestPermission(SHIZUKU_CODE)
+                }
             } else {
-                // Manual permission request
-                Shizuku.requestPermission(SHIZUKU_CODE)
+                Toast.makeText(
+                    this,
+                    "Shizuku not running! Start Shizuku app first.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        } else {
-            Toast.makeText(this, "📢 Shizuku not running! Start Shizuku app first.", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            // Shizuku not installed
+            Toast.makeText(this, "Shizuku error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -52,14 +64,12 @@ class GraphicsActivity : AppCompatActivity() {
         }
 
         val modeText = when {
-            isRestore -> "♻️ Default Graphics Restored"
+            isRestore -> "🔄 Default Graphics Restored"
             isUltra -> "🚀 144FPS Ultra Mode Applied"
             else -> "✅ Smooth Profile Applied"
         }
 
-        val lagText = if(antiLag) " + Anti-Lag ON" else ""
-        
+        val lagText = if (antiLag) " + Anti-Lag ON" else ""
         Toast.makeText(this, "$modeText$lagText", Toast.LENGTH_LONG).show()
-        // Yahan actual shell commands execution logic aayega
     }
 }
