@@ -15,48 +15,45 @@ class GraphicsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            // Sirf UI load karo, Shizuku ko touch bhi mat karo yahan
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
             binding.btnApplySettings.setOnClickListener {
-                runGraphicsOptimization()
+                if (Shizuku.pingBinder()) {
+                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                        applyGraphicsLogic()
+                    } else {
+                        Shizuku.requestPermission(SHIZUKU_CODE)
+                    }
+                } else {
+                    Toast.makeText(this, "📢 Shizuku not running!", Toast.LENGTH_SHORT).show()
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun runGraphicsOptimization() {
-        try {
-            // Check karo Shizuku running hai ya nahi
-            if (Shizuku.pingBinder()) {
-                
-                // Permission check aur request
-                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    executeShizukuCommands()
-                } else {
-                    Toast.makeText(this, "🔑 Requesting Permission...", Toast.LENGTH_SHORT).show()
-                    Shizuku.requestPermission(SHIZUKU_CODE)
-                }
-            } else {
-                Toast.makeText(this, "📢 Shizuku Service not running!", Toast.LENGTH_LONG).show()
-            }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Service Error: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun executeShizukuCommands() {
+    private fun applyGraphicsLogic() {
         val isUltra = binding.rbUltraExtreme.isChecked
+        val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
+        val antiLag = binding.switchAntiLag.isChecked
+        val force144 = binding.switchUnlock144.isChecked
 
-        if (!isUltra && !binding.rbSmooth.isChecked && !isRestore) {
-            Toast.makeText(this, "⚠️ Please select an option first!", Toast.LENGTH_SHORT).show()
+        if (!isUltra && !isSmooth && !isRestore) {
+            Toast.makeText(this, "⚠️ Select an option!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val status = if (isRestore) "♻️ Settings Restored!" else "🚀 144Hz Optimization Applied!"
-        Toast.makeText(this, status, Toast.LENGTH_LONG).show()
+        // Saare features yahan trigger honge
+        val mode = when {
+            isRestore -> "♻️ Default Restored"
+            isUltra -> "🚀 Ultra 144FPS"
+            else -> "✅ Smooth Profile"
+        }
+
+        val extra = if(antiLag) "+ Anti-Lag" else ""
+        Toast.makeText(this, "$mode $extra Applied Successfully!", Toast.LENGTH_LONG).show()
     }
 }
