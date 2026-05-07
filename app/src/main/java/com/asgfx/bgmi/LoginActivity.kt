@@ -1,5 +1,6 @@
 package com.asgfx.bgmi
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -21,10 +22,17 @@ class LoginActivity : AppCompatActivity() {
 
             if (username.isNotEmpty() && password.isNotEmpty()) {
                 Toast.makeText(this, "Welcome $username", Toast.LENGTH_SHORT).show()
-                
-                // DATA PASSING LOGIC
+
+                // 🔥 SESSION SAVE: Login details ko memory mein save kar rahe hain
+                val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    putBoolean("isLoggedIn", true)
+                    putString("USER_NAME", username)
+                    apply()
+                }
+
                 val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("USER_NAME", username) 
+                intent.putExtra("USER_NAME", username)
                 startActivity(intent)
                 finish()
             } else {
