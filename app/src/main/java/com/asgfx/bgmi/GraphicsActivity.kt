@@ -9,51 +9,50 @@ import android.content.pm.PackageManager
 
 class GraphicsActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityGraphicsBinding
+    private var _binding: ActivityGraphicsBinding? = null
+    private val binding get() = _binding!!
     private val SHIZUKU_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            binding = ActivityGraphicsBinding.inflate(layoutInflater)
+            // Null-safe inflation
+            _binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
             binding.btnApplySettings.setOnClickListener {
-                if (Shizuku.pingBinder()) {
-                    if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                        applyGraphicsLogic()
-                    } else {
-                        Shizuku.requestPermission(SHIZUKU_CODE)
-                    }
-                } else {
-                    Toast.makeText(this, "📢 Shizuku not running!", Toast.LENGTH_SHORT).show()
-                }
+                handleApply()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            // Agar UI crash ho toh message dikhega instead of closing
+            Toast.makeText(this, "UI Load Error: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
         }
     }
 
-    private fun applyGraphicsLogic() {
-        val isUltra = binding.rbUltraExtreme.isChecked
-        val isSmooth = binding.rbSmooth.isChecked
-        val isRestore = binding.rbRestore.isChecked
-        val antiLag = binding.switchAntiLag.isChecked
-        val force144 = binding.switchUnlock144.isChecked
-
-        if (!isUltra && !isSmooth && !isRestore) {
-            Toast.makeText(this, "⚠️ Select an option!", Toast.LENGTH_SHORT).show()
+    private fun handleApply() {
+        if (!Shizuku.pingBinder()) {
+            Toast.makeText(this, "📢 Shizuku not running!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Saare features yahan trigger honge
-        val mode = when {
-            isRestore -> "♻️ Default Restored"
-            isUltra -> "🚀 Ultra 144FPS"
-            else -> "✅ Smooth Profile"
+        if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+            executeLogic()
+        } else {
+            Shizuku.requestPermission(SHIZUKU_CODE)
         }
+    }
 
-        val extra = if(antiLag) "+ Anti-Lag" else ""
-        Toast.makeText(this, "$mode $extra Applied Successfully!", Toast.LENGTH_LONG).show()
+    private fun executeLogic() {
+        val isUltra = binding.rbUltraExtreme.isChecked
+        val isRestore = binding.rbRestore.isChecked
+        
+        val mode = if (isRestore) "♻️ Default" else if (isUltra) "🚀 144FPS" else "✅ Smooth"
+        Toast.makeText(this, "$mode Applied Successfully!", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 }
