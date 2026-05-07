@@ -9,59 +9,57 @@ import android.content.pm.PackageManager
 
 class GraphicsActivity : AppCompatActivity() {
 
-    private var _binding: ActivityGraphicsBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            _binding = ActivityGraphicsBinding.inflate(layoutInflater)
+            binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
             binding.btnApplySettings.setOnClickListener {
-                handleShizukuProcess()
+                checkAndRun()
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "UI Error: ${e.message}", Toast.LENGTH_LONG).show()
-            finish()
+            e.printStackTrace()
         }
     }
 
-    private fun handleShizukuProcess() {
-        try {
-            // Step 1: Check binder status
-            if (Shizuku.pingBinder()) {
-                // Step 2: Check or Request Permission
-                if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    applyGraphics()
-                } else {
-                    Toast.makeText(this, "🔑 Requesting Shizuku Permission...", Toast.LENGTH_SHORT).show()
-                    Shizuku.requestPermission(SHIZUKU_CODE)
-                }
+    private fun checkAndRun() {
+        if (Shizuku.pingBinder()) {
+            if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+                applyFinalGraphics()
             } else {
-                Toast.makeText(this, "📢 Shizuku not running! Please start Shizuku app.", Toast.LENGTH_LONG).show()
+                // Manual permission request
+                Shizuku.requestPermission(SHIZUKU_CODE)
             }
-        } catch (e: Exception) {
-            Toast.makeText(this, "Service Error: ${e.message}", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "📢 Shizuku not running! Start Shizuku app first.", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun applyGraphics() {
+    private fun applyFinalGraphics() {
         val isUltra = binding.rbUltraExtreme.isChecked
+        val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
-        
-        val mode = when {
-            isRestore -> "♻️ Default Settings Restored"
-            isUltra -> "🚀 144FPS Ultra Applied"
-            else -> "✅ Smooth Performance Applied"
-        }
-        
-        Toast.makeText(this, mode, Toast.LENGTH_LONG).show()
-    }
+        val antiLag = binding.switchAntiLag.isChecked
+        val force144 = binding.switchUnlock144.isChecked
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
+        if (!isUltra && !isSmooth && !isRestore) {
+            Toast.makeText(this, "⚠️ Please select a Graphics Mode!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val modeText = when {
+            isRestore -> "♻️ Default Graphics Restored"
+            isUltra -> "🚀 144FPS Ultra Mode Applied"
+            else -> "✅ Smooth Profile Applied"
+        }
+
+        val lagText = if(antiLag) " + Anti-Lag ON" else ""
+        
+        Toast.makeText(this, "$modeText$lagText", Toast.LENGTH_LONG).show()
+        // Yahan actual shell commands execution logic aayega
     }
 }
