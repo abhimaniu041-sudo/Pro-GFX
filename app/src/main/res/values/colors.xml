@@ -2,10 +2,13 @@
 <resources>
     <color name="colorPrimary">#0084FF</color>
     <color name="colorBackground">#0D0D0D</color>
+    
     <color name="colorCardBackground">#1A1A1A</color>
+    
     <color name="colorTextSecondary">#9E9E9E</color>
     <color name="colorSuccess">#00E676</color>
     <color name="colorDanger">#FF1744</color>
+    
     <color name="colorToggleOn">#0084FF</color>
     <color name="colorToggleOff">#444444</color>
     <color name="black">#000000</color>
