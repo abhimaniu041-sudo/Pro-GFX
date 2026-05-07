@@ -18,6 +18,7 @@ class SplashActivity : AppCompatActivity() {
             binding = ActivitySplashBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
+            // 2.5 Seconds delay for smooth premium feeling
             Handler(Looper.getMainLooper()).postDelayed({
                 
                 val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
@@ -25,6 +26,7 @@ class SplashActivity : AppCompatActivity() {
 
                 if (isLoggedIn) {
                     val intent = Intent(this, MainActivity::class.java)
+                    // Naam session se uthayenge
                     val savedName = sharedPref.getString("USER_NAME", "ABHIMANIU SHARMA")
                     intent.putExtra("USER_NAME", savedName)
                     startActivity(intent)
@@ -33,10 +35,12 @@ class SplashActivity : AppCompatActivity() {
                 }
                 
                 finish()
+                // Smooth fade transition
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                 
             }, 2500)
         } catch (e: Exception) {
+            // Backup
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
