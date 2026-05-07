@@ -19,10 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProGFX">
 
-        <activity
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.ProGFX.NoActionBar">
+        <activity android:name=".SplashActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,13 +30,6 @@
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".GraphicsActivity" android:exported="false" />
         <activity android:name=".SensitivityActivity" android:exported="false" />
-
-        <provider
-            android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="com.asgfx.bgmi.shizuku"
-            android:enabled="true"
-            android:exported="false"
-            android:multiprocess="false" />
 
     </application>
 </manifest>
