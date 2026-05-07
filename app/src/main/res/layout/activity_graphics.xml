@@ -25,101 +25,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.cardview.widget.CardView
+            <RadioButton
+                android:id="@+id/rbUltraExtreme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/colorCardBackground"
-                app:cardCornerRadius="12dp"
-                android:layout_marginBottom="12dp">
-                <RadioButton
-                    android:id="@+id/rbUltraExtreme"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="🚀 Ultra Extreme (144 FPS Unlock)"
-                    android:textColor="@color/colorSuccess"
-                    android:buttonTint="@color/colorSuccess" />
-            </androidx.cardview.widget.CardView>
+                android:text="🚀 Ultra Extreme (144 FPS Unlock)"
+                android:textColor="@color/white"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"/>
 
-            <androidx.cardview.widget.CardView
+            <RadioButton
+                android:id="@+id/rbSmooth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/colorCardBackground"
-                app:cardCornerRadius="12dp"
-                android:layout_marginBottom="12dp">
-                <RadioButton
-                    android:id="@+id/rbSmooth"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="Smooth Performance (Stable)"
-                    android:textColor="@color/white"
-                    android:buttonTint="@color/colorPrimary" />
-            </androidx.cardview.widget.CardView>
+                android:text="Smooth Performance (Stable)"
+                android:textColor="@color/white"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"/>
 
-            <androidx.cardview.widget.CardView
+            <RadioButton
+                android:id="@+id/rbRestore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/colorCardBackground"
-                app:cardCornerRadius="12dp"
-                android:layout_marginBottom="12dp">
-                <RadioButton
-                    android:id="@+id/rbRestore"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="🔄 Restore Original Graphics"
-                    android:textColor="@color/colorDanger"
-                    android:buttonTint="@color/colorDanger" />
-            </androidx.cardview.widget.CardView>
+                android:text="🔄 Restore Original Graphics"
+                android:textColor="@color/white"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp"/>
         </RadioGroup>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Extra Optimizations"
-            android:textColor="@color/colorTextSecondary"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="10dp"/>
-
-        <androidx.cardview.widget.CardView
+        <Switch
+            android:id="@+id/switchAntiLag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/colorCardBackground"
-            app:cardCornerRadius="12dp">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="8dp">
-                
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchAntiLag"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Anti-Lag Engine"
-                    android:textColor="@color/white"
-                    android:padding="12dp" />
+            android:text="Anti-Lag Engine"
+            android:textColor="@color/white"
+            android:padding="12dp"
+            android:layout_marginTop="20dp"/>
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchUnlock144"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Force 144Hz Refresh Rate"
-                    android:textColor="@color/white"
-                    android:padding="12dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        <Switch
+            android:id="@+id/switchUnlock144"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Force 144Hz Refresh Rate"
+            android:textColor="@color/white"
+            android:padding="12dp"/>
 
-        <androidx.appcompat.widget.AppCompatButton
+        <Button
             android:id="@+id/btnApplySettings"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="30dp"
             android:text="⚡ APPLY SETTINGS"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            android:background="@drawable/premium_primary_bg" />
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@color/white" />
 
     </LinearLayout>
 </ScrollView>
