@@ -23,6 +23,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // GET USERNAME FROM LOGIN
+        val userName = intent.getStringExtra("USER_NAME") ?: "Pro User"
+        binding.tvProfileName.text = userName
+
         setupStatus()
         setupClickListeners()
         initGameLauncher()
@@ -48,7 +52,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        // Settings click listener for theme
         binding.ivSettings.setOnClickListener {
             showThemeDialog()
         }
@@ -91,7 +94,6 @@ class MainActivity : AppCompatActivity() {
                 1 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                 2 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             }
-            Toast.makeText(this, "Theme applied!", Toast.LENGTH_SHORT).show()
         }
         builder.show()
     }
