@@ -64,7 +64,7 @@
                 app:cardCornerRadius="12dp"
                 android:layout_marginBottom="12dp">
                 <RadioButton
-                    android:id="@+id/rbDefault"
+                    android:id="@+id/rbRestore"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
@@ -112,7 +112,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnApplyGraphics"
+            android:id="@+id/btnApplySettings"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="30dp"
