@@ -23,7 +23,6 @@ class SensitivityActivity : AppCompatActivity() {
         binding.tvDeviceInfo.text = "Device: $model | RAM: $ram"
         binding.tvDeviceTier.text = "Tier: $tier"
 
-        // Initial Calculation (Default Gyro)
         calculateSensitivity(tier, true)
 
         binding.btnGyro.setOnClickListener {
@@ -40,12 +39,11 @@ class SensitivityActivity : AppCompatActivity() {
 
         binding.btnLoadBest.setOnClickListener {
             calculateSensitivity(tier, isGyroSelected)
-            Toast.makeText(this, "No-Recoil Profile Applied for $model", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Profile Optimized for $model", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun calculateSensitivity(tier: String, gyro: Boolean) {
-        // Multiplier based on device tier to ensure stability
         val multiplier = when (tier) {
             "High-end" -> 0.95
             "Mid-range" -> 1.10
@@ -53,7 +51,6 @@ class SensitivityActivity : AppCompatActivity() {
         }
 
         if (gyro) {
-            // High speed Gyro settings
             binding.tvTppNoScope.text = "${(350 * multiplier).toInt()}%"
             binding.tvRedDot.text = "${(320 * multiplier).toInt()}%"
             binding.tv2x.text = "${(280 * multiplier).toInt()}%"
@@ -62,7 +59,6 @@ class SensitivityActivity : AppCompatActivity() {
             binding.tv6x.text = "${(110 * multiplier).toInt()}%"
             binding.tv8x.text = "${(85 * multiplier).toInt()}%"
         } else {
-            // Precision ADS (Non-Gyro) settings
             binding.tvTppNoScope.text = "${(125 * multiplier).toInt()}%"
             binding.tvRedDot.text = "${(65 * multiplier).toInt()}%"
             binding.tv2x.text = "${(38 * multiplier).toInt()}%"
