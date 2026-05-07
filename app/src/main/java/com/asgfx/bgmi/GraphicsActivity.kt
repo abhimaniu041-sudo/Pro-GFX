@@ -12,68 +12,52 @@ class GraphicsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
-    private val binderListener = Shizuku.OnBinderReceivedListener {
-        // Automatically check connection status when binder is received
-        checkShizukuStatus(false)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
-            // ✅ Sticky listener used to detect existing connections
-            Shizuku.addBinderReceivedListenerSticky(binderListener)
+            // Startup par sirf ping karenge, koi bhari listener nahi
+            if (Shizuku.pingBinder()) {
+                // Connection hai
+            }
 
             binding.btnApplySettings.setOnClickListener {
-                checkShizukuStatus(true)
+                runGraphicsProcess()
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun checkShizukuStatus(isManualClick: Boolean) {
+    private fun runGraphicsProcess() {
         try {
             if (Shizuku.pingBinder()) {
                 if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                    if (isManualClick) applyFinalGraphics()
+                    applyFinalSettings()
                 } else {
-                    // Force permission request if authorized in Shizuku app but session is cold
+                    Toast.makeText(this, "🔑 Requesting Permission...", Toast.LENGTH_SHORT).show()
                     Shizuku.requestPermission(SHIZUKU_CODE)
                 }
             } else {
-                if (isManualClick) {
-                    Toast.makeText(this, "📢 Shizuku Binder not connected! Restart Shizuku app.", Toast.LENGTH_LONG).show()
-                }
+                Toast.makeText(this, "📢 Shizuku Binder not connected! Open Shizuku app first.", Toast.LENGTH_LONG).show()
             }
         } catch (e: Exception) {
-            if (isManualClick) Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun applyFinalGraphics() {
+    private fun applyFinalSettings() {
         val isUltra = binding.rbUltraExtreme.isChecked
-        val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
 
-        if (!isUltra && !isSmooth && !isRestore) {
-            Toast.makeText(this, "⚠️ Please select a Graphics Mode!", Toast.LENGTH_SHORT).show()
+        if (!isUltra && !binding.rbSmooth.isChecked && !isRestore) {
+            Toast.makeText(this, "⚠️ Please select an option!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val modeText = when {
-            isRestore -> "♻️ Original Graphics Restored"
-            isUltra -> "🚀 144FPS Mode Applied Successfully!"
-            else -> "✅ Smooth Profile Applied!"
-        }
-        
-        Toast.makeText(this, modeText, Toast.LENGTH_LONG).show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Shizuku.removeBinderReceivedListener(binderListener)
+        val msg = if (isRestore) "♻️ Settings Restored!" else "🚀 Graphics Optimized!"
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 }
