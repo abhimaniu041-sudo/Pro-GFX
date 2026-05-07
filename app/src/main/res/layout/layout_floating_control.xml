@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#CC000000" 
+    android:padding="5dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:background="#22FFFFFF"
+        android:padding="4dp">
+
+        <ImageView
+            android:id="@+id/btnHide"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:padding="8dp"
+            android:contentDescription="Hide/Show"
+            android:tint="#00E5FF" />
+
+        <ImageView
+            android:id="@+id/btnRunBgmi"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_play"
+            android:padding="8dp"
+            android:contentDescription="Run BGMI"
+            android:tint="#00E5FF" />
+
+        <ImageView
+            android:id="@+id/btnSmartRun"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_dialog_dialer"
+            android:padding="8dp"
+            android:contentDescription="Smart Run"
+            android:tint="#00E5FF" />
+
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:padding="8dp"
+            android:contentDescription="Close"
+            android:tint="#FF1744" />
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/featureContainer"
+        android:layout_width="220dp"
+        android:layout_height="250dp"
+        android:layout_marginTop="5dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/modListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#44000000"
+            android:padding="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ACTIVE MOD ENGINE"
+                android:textColor="#00E5FF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.2"/>
+
+            </LinearLayout>
+    </ScrollView>
+</LinearLayout>
