@@ -2,9 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground">
-
-    <LinearLayout
+    android:background="#000000"> <LinearLayout
         android:id="@+id/logoContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,32 +14,44 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:background="@drawable/ic_launcher"
-            android:backgroundTint="@color/colorPrimary" />
-
-        <TextView
+            android:backgroundTint="#FF0000" /> <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="AS"
-            android:textColor="@color/white"
-            android:textSize="40sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pro GFX Tool"
-            android:textColor="@color/colorPrimary"
+            android:layout_marginTop="20dp"
+            android:text="ABHIMANIU SHARMA"
+            android:textColor="#FFFFFF"
             android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:letterSpacing="0.1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PRO GFX TOOL"
+            android:textColor="#FF0000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Premium Gaming Utility"
-            android:textColor="@color/colorTextSecondary"
-            android:textSize="14sp" />
+            android:textColor="#888888"
+            android:textSize="12sp" />
 
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:text="v1.2 Premium"
+        android:textColor="#444444"
+        android:textSize="10sp"
+        android:letterSpacing="0.5" />
+
 </RelativeLayout>
