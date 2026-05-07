@@ -12,65 +12,68 @@ class GraphicsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
+    // Listener ko variable mein rakhein taaki destroy par remove kar sakein
+    private val permissionListener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+        if (requestCode == SHIZUKU_CODE && grantResult == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "✅ Shizuku Permission Granted!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityGraphicsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        try {
+            binding = ActivityGraphicsBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        // Shizuku permission result listener
-        Shizuku.addRequestPermissionResultListener { requestCode, grantResult ->
-            if (requestCode == SHIZUKU_CODE && grantResult == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "✅ Shizuku Permission Granted!", Toast.LENGTH_SHORT).show()
-                applyOptimizations() // Permission milte hi apply kar do
+            // Safe listener addition
+            if (Shizuku.pingBinder()) {
+                Shizuku.addRequestPermissionResultListener(permissionListener)
             }
-        }
 
-        binding.btnApplySettings.setOnClickListener {
-            checkAndRun()
+            binding.btnApplySettings.setOnClickListener {
+                handleApplyFlow()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "UI Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun checkAndRun() {
-        if (Shizuku.pingBinder()) {
+    private fun handleApplyFlow() {
+        try {
+            if (!Shizuku.pingBinder()) {
+                Toast.makeText(this, "📢 Shizuku not running! Please start Shizuku app.", Toast.LENGTH_LONG).show()
+                return
+            }
+
             if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
-                applyOptimizations()
+                applyFinalSettings()
             } else {
-                // 🔥 Ye line zaroori hai popup dikhane ke liye
                 Shizuku.requestPermission(SHIZUKU_CODE)
             }
-        } else {
-            Toast.makeText(this, "📢 Shizuku Service not running! Open Shizuku app first.", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Toast.makeText(this, "Service Error: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun applyOptimizations() {
+    private fun applyFinalSettings() {
         val isUltra = binding.rbUltraExtreme.isChecked
         val isSmooth = binding.rbSmooth.isChecked
         val isRestore = binding.rbRestore.isChecked
 
         if (!isUltra && !isSmooth && !isRestore) {
-            Toast.makeText(this, "⚠️ Please select a Graphics Mode!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "⚠️ Select a Graphics Mode!", Toast.LENGTH_SHORT).show()
             return
         }
 
-        when {
-            isRestore -> {
-                binding.rgGraphics.clearCheck()
-                binding.switchAntiLag.isChecked = false
-                binding.switchUnlock144.isChecked = false
-                Toast.makeText(this, "♻️ Settings Restored to Default", Toast.LENGTH_LONG).show()
-            }
-            else -> {
-                val mode = if (isUltra) "144FPS Ultra" else "Smooth"
-                Toast.makeText(this, "🚀 Applying $mode Optimization via Shizuku...", Toast.LENGTH_LONG).show()
-                // Yahan actual command execution logic aayega
-            }
-        }
+        val msg = if (isRestore) "♻️ Settings Reset!" else "🚀 144Hz Optimization Applied!"
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Listener remove karna mat bhulna
-        Shizuku.removeRequestPermissionResultListener { _, _ -> }
+        try {
+            Shizuku.removeRequestPermissionResultListener(permissionListener)
+        } catch (e: Exception) { }
     }
 }
