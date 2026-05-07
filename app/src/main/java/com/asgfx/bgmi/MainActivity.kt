@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         setupStatus()
         setupClickListeners()
         initGameLauncher()
-        setupModWarehouse() // Dynamic scan function
+        setupModWarehouse() 
     }
 
     private fun setupStatus() {
@@ -67,19 +67,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // 🔥 UPDATED: Dynamic File Scanner for MODs
     private fun setupModWarehouse() {
         val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
         val container = findViewById<LinearLayout>(R.id.modListContainer)
         
-        // Configs folder path: Android/data/com.asgfx.bgmi/files/Configs
         val configFolder = File(getExternalFilesDir(null), "Configs")
         if (!configFolder.exists()) configFolder.mkdirs()
 
-        // Scan for .zip files only
         val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
         
-        container.removeAllViews() // Purani list clear karein
+        container.removeAllViews() 
 
         if (zipFiles.isNullOrEmpty()) {
             val emptyMsg = TextView(this).apply {
@@ -89,15 +86,31 @@ class MainActivity : AppCompatActivity() {
             }
             container.addView(emptyMsg)
         } else {
-            // Maximum 10 files dikhayenge jaisa aapne kaha tha
             zipFiles.take(10).forEach { file ->
                 val fileName = file.name
                 val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_list, null)
                 val tvName = modView.findViewById<TextView>(R.id.tvModItemName)
                 val swMod = modView.findViewById<SwitchMaterial>(R.id.swModItem)
+                val btnDelete = modView.findViewById<View>(R.id.btnDeleteMod)
 
-                tvName.text = fileName // File ka asli naam (e.g. MOD1.zip)
+                tvName.text = fileName 
                 swMod.isChecked = sharedPref.getBoolean(fileName, false)
+
+                // 🔥 Delete Logic: Config hamesha ke liye remove karne ke liye
+                btnDelete.setOnClickListener {
+                    AlertDialog.Builder(this)
+                        .setTitle("Delete Config")
+                        .setMessage("Kya aap $fileName ko delete karna chahte hain?")
+                        .setPositiveButton("Delete") { _, _ ->
+                            if (file.delete()) {
+                                sharedPref.edit().remove(fileName).apply()
+                                Toast.makeText(this, "File Deleted", Toast.LENGTH_SHORT).show()
+                                setupModWarehouse() // Refresh list
+                            }
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                }
 
                 swMod.setOnCheckedChangeListener { _, isChecked ->
                     sharedPref.edit().putBoolean(fileName, isChecked).apply()
