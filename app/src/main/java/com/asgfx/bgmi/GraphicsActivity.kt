@@ -12,9 +12,9 @@ class GraphicsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGraphicsBinding
     private val SHIZUKU_CODE = 1001
 
-    // Listener jo connection aate hi binder ko "Catch" kar lega
     private val binderListener = Shizuku.OnBinderReceivedListener {
-        checkShizukuStatus(false) 
+        // Automatically check connection status when binder is received
+        checkShizukuStatus(false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,11 +23,11 @@ class GraphicsActivity : AppCompatActivity() {
             binding = ActivityGraphicsBinding.inflate(layoutInflater)
             setContentView(binding.root)
 
-            // ✅ Connection detect karne ke liye sticky listener
+            // ✅ Sticky listener used to detect existing connections
             Shizuku.addBinderReceivedListenerSticky(binderListener)
 
             binding.btnApplySettings.setOnClickListener {
-                checkShizukuStatus(true) 
+                checkShizukuStatus(true)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -40,7 +40,7 @@ class GraphicsActivity : AppCompatActivity() {
                 if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
                     if (isManualClick) applyFinalGraphics()
                 } else {
-                    // Agar authorized hai par session expired hai
+                    // Force permission request if authorized in Shizuku app but session is cold
                     Shizuku.requestPermission(SHIZUKU_CODE)
                 }
             } else {
@@ -59,7 +59,7 @@ class GraphicsActivity : AppCompatActivity() {
         val isRestore = binding.rbRestore.isChecked
 
         if (!isUltra && !isSmooth && !isRestore) {
-            Toast.makeText(this, "⚠️ Select Graphics Mode First!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "⚠️ Please select a Graphics Mode!", Toast.LENGTH_SHORT).show()
             return
         }
 
