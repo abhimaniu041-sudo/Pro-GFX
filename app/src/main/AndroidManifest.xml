@@ -15,10 +15,6 @@
 
     <queries>
         <package android:name="moe.shizuku.privileged.api" />
-        <intent>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent>
     </queries>
 
     <application
@@ -48,7 +44,7 @@
 
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="${applicationId}.shizuku"
+            android:authorities="com.asgfx.bgmi.shizuku"
             android:enabled="true"
             android:exported="false"
             android:multiprocess="false" />
