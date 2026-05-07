@@ -23,8 +23,7 @@ class SensitivityActivity : AppCompatActivity() {
         binding.tvDeviceInfo.text = "Device: $model | RAM: $ram"
         binding.tvDeviceTier.text = "Tier: $tier"
 
-        calculateSensitivity(tier, true)
-
+        // Setup Buttons
         binding.btnGyro.setOnClickListener {
             isGyroSelected = true
             updateTabUI()
@@ -41,6 +40,9 @@ class SensitivityActivity : AppCompatActivity() {
             calculateSensitivity(tier, isGyroSelected)
             Toast.makeText(this, "Profile Optimized for $model", Toast.LENGTH_SHORT).show()
         }
+
+        // Initial Calculation
+        calculateSensitivity(tier, true)
     }
 
     private fun calculateSensitivity(tier: String, gyro: Boolean) {
