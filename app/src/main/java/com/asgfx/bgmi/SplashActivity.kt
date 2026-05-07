@@ -14,32 +14,31 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySplashBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        try {
+            binding = ActivitySplashBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        // 2.5 Seconds delay for a smoother feel
-        Handler(Looper.getMainLooper()).postDelayed({
-            
-            // 🔥 SESSION CHECK
-            val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
-            val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
+            Handler(Looper.getMainLooper()).postDelayed({
+                
+                val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                val isLoggedIn = sharedPref.getBoolean("isLoggedIn", false)
 
-            if (isLoggedIn) {
-                // User already logged in, go to Dashboard
-                val intent = Intent(this, MainActivity::class.java)
-                // Passing saved username or default name
-                val savedName = sharedPref.getString("USER_NAME", "ABHIMANIU SHARMA")
-                intent.putExtra("USER_NAME", savedName)
-                startActivity(intent)
-            } else {
-                // No session found, go to Login
-                startActivity(Intent(this, LoginActivity::class.java))
-            }
-            
+                if (isLoggedIn) {
+                    val intent = Intent(this, MainActivity::class.java)
+                    val savedName = sharedPref.getString("USER_NAME", "ABHIMANIU SHARMA")
+                    intent.putExtra("USER_NAME", savedName)
+                    startActivity(intent)
+                } else {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                }
+                
+                finish()
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+                
+            }, 2500)
+        } catch (e: Exception) {
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
-            // Adding a smooth fade transition
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-            
-        }, 2500)
+        }
     }
 }
