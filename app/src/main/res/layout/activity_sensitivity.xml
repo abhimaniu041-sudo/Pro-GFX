@@ -82,7 +82,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="12dp">
+                android:padding="8dp">
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
                     <TextView android:text="TPP No Scope" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
@@ -90,7 +90,7 @@
                 </RelativeLayout>
 
                 <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp">
-                    <TextView android:text="Red Dot / Holographic" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
+                    <TextView android:text="Red Dot / Holo" android:textColor="@color/colorTextSecondary" android:layout_alignParentStart="true"/>
                     <TextView android:id="@+id/tvRedDot" android:textColor="@color/colorPrimary" android:textStyle="bold" android:layout_alignParentEnd="true"/>
                 </RelativeLayout>
 
