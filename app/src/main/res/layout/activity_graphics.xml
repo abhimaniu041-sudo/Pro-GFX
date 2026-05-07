@@ -64,13 +64,13 @@
                 app:cardCornerRadius="12dp"
                 android:layout_marginBottom="12dp">
                 <RadioButton
-                    android:id="@+id/rbUltraHdr"
+                    android:id="@+id/rbDefault"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="Ultra HDR + Cinema Mode"
-                    android:textColor="@color/white"
-                    android:buttonTint="@color/colorPrimary" />
+                    android:text="🔄 Restore Original Graphics"
+                    android:textColor="@color/colorDanger"
+                    android:buttonTint="@color/colorDanger" />
             </androidx.cardview.widget.CardView>
         </RadioGroup>
 
@@ -116,7 +116,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="30dp"
-            android:text="⚡ APPLY BEST GRAPHICS"
+            android:text="⚡ APPLY SETTINGS"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:background="@drawable/premium_primary_bg" />
