@@ -13,7 +13,7 @@ import java.net.InetAddress
 
 class ControllerActivity : AppCompatActivity() {
 
-    private val tvIpAddress = "192.168.1.XX" // 🔥 Apna TV IP update karein
+    private val tvIpAddress = "192.168.1.2" // 🔥 Updated from your screenshot
     private val port = 8888
     private var socket: DatagramSocket? = null
     private var isEditMode = false
@@ -24,7 +24,7 @@ class ControllerActivity : AppCompatActivity() {
 
         Thread { socket = DatagramSocket() }.start()
 
-        // 📝 BGMI Full Control List from your screenshots
+        // Match these IDs with XML
         val bgmiControls = mapOf(
             R.id.btn_fire to "KEY_FIRE",
             R.id.btn_scope to "KEY_SCOPE",
@@ -39,15 +39,15 @@ class ControllerActivity : AppCompatActivity() {
         )
 
         bgmiControls.forEach { (id, cmd) ->
-            val view = findViewById<View>(id)
-            setupGamingTouch(view, cmd)
-            loadPosition(view, id.toString())
+            findViewById<View>(id)?.let { view ->
+                setupGamingTouch(view, cmd)
+                loadPosition(view, id.toString())
+            }
         }
 
-        // Edit Mode Toggle: Long tap anywhere on background
         findViewById<View>(android.R.id.content).setOnLongClickListener {
             isEditMode = !isEditMode
-            Toast.makeText(this, if(isEditMode) "Layout Edit On" else "Gaming Mode On", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, if(isEditMode) "Edit Mode On" else "Gaming Mode On", Toast.LENGTH_SHORT).show()
             true
         }
     }
@@ -59,20 +59,15 @@ class ControllerActivity : AppCompatActivity() {
 
         view.setOnTouchListener { v, event ->
             if (isEditMode) {
-                // DRAG LOGIC (To match your BGMI layout)
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> { dX = v.x - event.rawX; dY = v.y - event.rawY }
                     MotionEvent.ACTION_MOVE -> { v.x = event.rawX + dX; v.y = event.rawY + dY }
                     MotionEvent.ACTION_UP -> savePosition(v, v.id.toString())
                 }
             } else {
-                // 🔥 GAMING COMMANDS
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> sendCommand("${command}_START")
                     MotionEvent.ACTION_UP -> sendCommand("${command}_STOP")
-                    MotionEvent.ACTION_MOVE -> if(command == "JOY_MOVE") {
-                        sendCommand("AXIS_${event.x.toInt()}_${event.y.toInt()}")
-                    }
                 }
             }
             true
