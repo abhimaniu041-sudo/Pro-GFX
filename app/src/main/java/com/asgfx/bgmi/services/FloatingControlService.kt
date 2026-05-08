@@ -3,7 +3,6 @@ package com.asgfx.bgmi.services
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
@@ -28,10 +27,23 @@ class FloatingControlService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Start Foreground First (Oreo+ support)
-        runAsForeground()
+        // 1. Notification setup for Foreground
+        val channelId = "floating_panel_channel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "GFX Service", NotificationManager.IMPORTANCE_LOW)
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+        }
 
-        // 2. Initialize Window Manager
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Pro GFX Active")
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+
+        startForeground(101, notification)
+
+        // 2. Window Manager Setup
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val inflater = LayoutInflater.from(this)
 
@@ -44,18 +56,20 @@ class FloatingControlService : Service() {
                 WindowManager.LayoutParams.TYPE_PHONE
             }
 
-            // Fixed Dimensions for visibility
+            // 🔥 MASTER FLAGS: Window ko har haal mein dikhane ke liye
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 layoutType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT
             )
 
             params.gravity = Gravity.TOP or Gravity.START
             params.x = 100
-            params.y = 200
+            params.y = 300 // Thoda aur niche shift kiya taaki status bar se na takraye
 
             if (floatingView?.parent == null) {
                 windowManager?.addView(floatingView, params)
@@ -69,25 +83,6 @@ class FloatingControlService : Service() {
         }
     }
 
-    private fun runAsForeground() {
-        val channelId = "floating_panel_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "GFX Floating Service", NotificationManager.IMPORTANCE_MIN)
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
-        }
-
-        // 🔥 Fixed: Using drawable instead of mipmap to avoid build error
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Pro GFX Active")
-            .setContentText("Control panel is running")
-            .setSmallIcon(R.drawable.ic_launcher) 
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .build()
-
-        startForeground(101, notification)
-    }
-
     private fun setupUI() {
         floatingView?.let { view ->
             val featurePage = view.findViewById<ScrollView>(R.id.featureContainer)
@@ -95,14 +90,13 @@ class FloatingControlService : Service() {
             view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
                 featurePage.visibility = if (isExpanded) View.VISIBLE else View.GONE
-                Toast.makeText(this, if(isExpanded) "Menu Opened" else "Menu Hidden", Toast.LENGTH_SHORT).show()
             }
 
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
                 packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
                     it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(it)
-                } ?: Toast.makeText(this, "BGMI Not Installed", Toast.LENGTH_SHORT).show()
+                }
             }
 
             view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
@@ -123,13 +117,6 @@ class FloatingControlService : Service() {
                 if (prefs.getBoolean(file.name, false)) {
                     val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
                     modView.findViewById<TextView>(R.id.tvModName).text = file.name
-                    
-                    val sw = modView.findViewById<SwitchCompat>(R.id.swModApply)
-                    sw.setOnCheckedChangeListener { _, isChecked ->
-                        val msg = if(isChecked) "Applying ${file.name}" else "Removing ${file.name}"
-                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-                    }
-                    
                     container.addView(modView)
                 }
             }
@@ -139,9 +126,7 @@ class FloatingControlService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         floatingView?.let { 
-            try {
-                windowManager?.removeView(it) 
-            } catch (e: Exception) { }
+            try { windowManager?.removeView(it) } catch (e: Exception) { }
         }
     }
 }
