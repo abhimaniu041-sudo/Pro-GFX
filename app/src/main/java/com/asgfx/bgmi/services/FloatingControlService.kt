@@ -1,15 +1,11 @@
 package com.asgfx.bgmi.services
 
+import android.annotation.SuppressLint
 import android.app.*
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.graphics.PixelFormat
-import android.os.Build
-import android.os.IBinder
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.WindowManager
+import android.os.*
+import android.view.*
 import android.widget.*
 import androidx.core.app.NotificationCompat
 import com.asgfx.bgmi.R
@@ -17,115 +13,117 @@ import java.io.File
 
 class FloatingControlService : Service() {
 
-    private var windowManager: WindowManager? = null
+    private lateinit var windowManager: WindowManager
     private var floatingView: View? = null
     private var isExpanded = false
+    
+    // Position Variables for Moving
+    private var initialX = 0
+    private var initialY = 0
+    private var initialTouchX = 0f
+    private var initialTouchY = 0f
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate() {
         super.onCreate()
-
-        // 1. Stable Foreground Start
-        startServiceInForeground()
+        startForegroundService()
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        
-        try {
-            floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
+        floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
 
-            val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                WindowManager.LayoutParams.TYPE_PHONE
-            }
-
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                layoutType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                PixelFormat.TRANSLUCENT
-            )
-
-            params.gravity = Gravity.TOP or Gravity.START
-            params.x = 100
-            params.y = 300
-
-            if (floatingView?.parent == null) {
-                windowManager?.addView(floatingView, params)
-            }
-
-            setupUI()
-            loadMods()
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(this, "Overlay Error: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun startServiceInForeground() {
-        val channelId = "pro_gfx_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Pro GFX Service", NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 100; y = 300
         }
 
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Pro GFX Menu Active")
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setOngoing(true)
-            .build()
+        // 🔥 MASTER DRAG/MOVE LOGIC
+        floatingView?.findViewById<View>(R.id.dragHandle)?.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(floatingView, params)
+                    true
+                }
+                else -> false
+            }
+        }
 
-        startForeground(101, notification)
+        setupUI()
+        windowManager.addView(floatingView, params)
     }
 
     private fun setupUI() {
         floatingView?.let { v ->
-            val featurePage = v.findViewById<ScrollView>(R.id.featureContainer)
+            val page = v.findViewById<ScrollView>(R.id.featureContainer)
             
+            // Hide/Show Toggle
             v.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
-                featurePage.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                page.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
 
+            // Launch BGMI
             v.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
-                packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
-                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(it)
-                } ?: Toast.makeText(this, "Game not found", Toast.LENGTH_SHORT).show()
+                launchTargetApp("com.pubg.imobile")
             }
 
-            v.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
-                stopSelf()
+            // 🔥 SMART RUN: Launch Any Game installed
+            v.findViewById<ImageView>(R.id.btnSmartRun).setOnClickListener {
+                val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+                val allApps = packageManager.queryIntentActivities(intent, 0)
+                // Filters common game keywords
+                val gameApp = allApps.find { 
+                    val pkg = it.activityInfo.packageName.lowercase()
+                    pkg.contains("game") || pkg.contains("pubg") || pkg.contains("freefire") || pkg.contains("cod") || pkg.contains("mobile")
+                }
+                
+                if (gameApp != null) {
+                    launchTargetApp(gameApp.activityInfo.packageName)
+                } else {
+                    Toast.makeText(this, "No games detected automatically", Toast.LENGTH_SHORT).show()
+                }
             }
+
+            v.findViewById<ImageView>(R.id.btnClose).setOnClickListener { stopSelf() }
         }
     }
 
-    private fun loadMods() {
-        floatingView?.let { v ->
-            val container = v.findViewById<LinearLayout>(R.id.modListLayout)
-            val prefs = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-            val files = File(getExternalFilesDir(null), "Configs").listFiles { f -> f.extension == "zip" }
+    private fun launchTargetApp(pkg: String) {
+        packageManager.getLaunchIntentForPackage(pkg)?.let {
+            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(it)
+        } ?: Toast.makeText(this, "Target app not found", Toast.LENGTH_SHORT).show()
+    }
 
-            container.removeAllViews()
-            files?.forEach { file ->
-                if (prefs.getBoolean(file.name, false)) {
-                    val modRow = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
-                    modRow.findViewById<TextView>(R.id.tvModName).text = file.name
-                    container.addView(modRow)
-                }
-            }
+    private fun startForegroundService() {
+        val channelId = "pro_gfx_gaming"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Gaming Engine", NotificationManager.IMPORTANCE_LOW)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
+        startForeground(105, NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Pro GFX Overlay Active")
+            .setSmallIcon(R.drawable.ic_launcher).build())
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingView?.let { 
-            try { windowManager?.removeView(it) } catch (e: Exception) { }
-        }
+        floatingView?.let { windowManager.removeView(it) }
     }
 }
