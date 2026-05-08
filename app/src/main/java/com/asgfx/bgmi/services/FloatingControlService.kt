@@ -37,7 +37,7 @@ class FloatingControlService : Service() {
             // 1. Inflate the layout
             floatingView = inflater.inflate(R.layout.layout_floating_control, null)
 
-            // 2. Set Window Parameters (Modern Android Support)
+            // 2. Set Window Parameters (Explicit Width/Height)
             val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             } else {
@@ -45,27 +45,28 @@ class FloatingControlService : Service() {
             }
 
             val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT, // Width
+                WindowManager.LayoutParams.WRAP_CONTENT, // Height
                 layoutType,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
             )
 
-            // Initial Position
-            params.gravity = Gravity.TOP or Gravity.START
-            params.x = 100
-            params.y = 200
+            // Screen ke beech mein dikhane ke liye (Debug ke liye best hai)
+            params.gravity = Gravity.CENTER 
+            params.x = 0
+            params.y = 0
 
-            // 3. Add to Window
-            windowManager?.addView(floatingView, params)
+            // 3. Important: Check if view already added
+            if (floatingView?.parent == null) {
+                windowManager?.addView(floatingView, params)
+            }
 
-            // 4. Setup Controls
             setupControlButtons()
             loadDynamicModList()
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Layout Error: ${e.message}", Toast.LENGTH_LONG).show()
             stopSelf()
         }
     }
@@ -74,21 +75,24 @@ class FloatingControlService : Service() {
         floatingView?.let { view ->
             val featureContainer = view.findViewById<ScrollView>(R.id.featureContainer)
             
+            // Toggle Logic
             view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
                 featureContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
 
+            // Quick Run BGMI
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
                 val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
                 if (launchIntent != null) {
                     launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(launchIntent)
                 } else {
-                    Toast.makeText(this, "BGMI not installed!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "BGMI Not Installed", Toast.LENGTH_SHORT).show()
                 }
             }
 
+            // Close Logic
             view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
                 stopSelf()
             }
@@ -107,6 +111,7 @@ class FloatingControlService : Service() {
 
             zipFiles?.forEach { file ->
                 val fileName = file.name
+                // Check if mod was enabled in MainActivity
                 if (sharedPref.getBoolean(fileName, false)) {
                     val modItem = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
                     val tvName = modItem.findViewById<TextView>(R.id.tvModName)
@@ -114,7 +119,7 @@ class FloatingControlService : Service() {
 
                     tvName.text = fileName
                     swMod.setOnCheckedChangeListener { _, isChecked ->
-                        Toast.makeText(this, "${if (isChecked) "Applying" else "Removing"} $fileName", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "${if (isChecked) "Applied" else "Removed"} $fileName", Toast.LENGTH_SHORT).show()
                     }
                     modContainer.addView(modItem)
                 }
@@ -124,8 +129,12 @@ class FloatingControlService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingView?.let {
-            windowManager?.removeView(it)
+        if (floatingView != null && windowManager != null) {
+            try {
+                windowManager?.removeView(floatingView)
+            } catch (e: Exception) {
+                // View already removed or not added
+            }
         }
     }
 }
