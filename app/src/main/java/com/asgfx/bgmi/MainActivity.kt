@@ -71,12 +71,12 @@ class MainActivity : AppCompatActivity() {
     private fun setupModWarehouse() {
         val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
         val container = findViewById<LinearLayout>(R.id.modListContainer)
-        
+
         val configFolder = File(getExternalFilesDir(null), "Configs")
         if (!configFolder.exists()) configFolder.mkdirs()
 
         val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
-        container.removeAllViews() 
+        container.removeAllViews()
 
         if (zipFiles.isNullOrEmpty()) {
             val emptyMsg = TextView(this).apply {
@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                 val swMod = modView.findViewById<SwitchMaterial>(R.id.swModItem)
                 val btnDelete = modView.findViewById<View>(R.id.btnDeleteMod)
 
-                tvName.text = fileName 
+                tvName.text = fileName
                 swMod.isChecked = sharedPref.getBoolean(fileName, false)
 
                 btnDelete.setOnClickListener {
@@ -142,6 +142,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, GraphicsActivity::class.java))
         }
 
+        // 🔥 NEW: Controller Activity Link
+        binding.btnOpenController.setOnClickListener {
+            startActivity(Intent(this, ControllerActivity::class.java))
+        }
+
         binding.btnRunGame.setOnClickListener {
             val installedGames = DeviceUtils.getAllInstalledGames(this)
             if (installedGames.isNotEmpty()) {
@@ -156,7 +161,6 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                 startActivity(intent)
             } else {
-                // 🔥 Updated: Support for Foreground Service start
                 val serviceIntent = Intent(this, FloatingControlService::class.java)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForegroundService(serviceIntent)
