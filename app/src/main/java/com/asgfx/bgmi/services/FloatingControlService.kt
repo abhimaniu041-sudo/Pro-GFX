@@ -9,13 +9,12 @@ import android.view.*
 import android.widget.*
 import androidx.core.app.NotificationCompat
 import com.asgfx.bgmi.R
-import java.io.File
 
 class FloatingControlService : Service() {
 
     private lateinit var windowManager: WindowManager
     private var floatingView: View? = null
-    private var isExpanded = false
+    private lateinit var params: WindowManager.LayoutParams
     
     private var initialX = 0
     private var initialY = 0
@@ -30,76 +29,63 @@ class FloatingControlService : Service() {
         startForeground(110, createNotification())
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        
-        try {
-            floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
+        floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
 
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            ).apply {
-                gravity = Gravity.TOP or Gravity.START
-                x = 100
-                y = 300
-            }
-
-            // 🔥 MOVING LOGIC
-            floatingView?.findViewById<View>(R.id.dragHandle)?.setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        initialX = params.x
-                        initialY = params.y
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
-                        true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        params.x = initialX + (event.rawX - initialTouchX).toInt()
-                        params.y = initialY + (event.rawY - initialTouchY).toInt()
-                        windowManager.updateViewLayout(floatingView, params)
-                        true
-                    }
-                    else -> false
-                }
-            }
-
-            setupActions()
-            windowManager.addView(floatingView, params)
-            
-        } catch (e: Exception) {
-            e.printStackTrace()
+        params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 100
+            y = 300
         }
+
+        // 🔥 FIX: Smooth Dragging on Whole View
+        floatingView?.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(floatingView, params)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        setupUI()
+        windowManager.addView(floatingView, params)
     }
 
-    private fun setupActions() {
+    private fun setupUI() {
         floatingView?.let { v ->
-            val container = v.findViewById<ScrollView>(R.id.featureContainer)
-            
+            val expandedMenu = v.findViewById<View>(R.id.expandedMenu)
+            val collapsedIcon = v.findViewById<View>(R.id.collapsedIcon)
+
+            // Hide (Minimize) Menu
             v.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
-                isExpanded = !isExpanded
-                container.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                expandedMenu.visibility = View.GONE
+                collapsedIcon.visibility = View.VISIBLE
+            }
+
+            // Show (Maximize) Menu
+            collapsedIcon.setOnClickListener {
+                collapsedIcon.visibility = View.GONE
+                expandedMenu.visibility = View.VISIBLE
             }
 
             v.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
                 launchApp("com.pubg.imobile")
-            }
-
-            // 🔥 SMART LAUNCHER: Detects any installed game
-            v.findViewById<ImageView>(R.id.btnSmartRun).setOnClickListener {
-                val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-                val apps = packageManager.queryIntentActivities(intent, 0)
-                val gameKeywords = listOf("game", "pubg", "freefire", "cod", "mobile", "battle", "arena")
-                
-                val game = apps.find { app ->
-                    val pkg = app.activityInfo.packageName.lowercase()
-                    gameKeywords.any { pkg.contains(it) } && pkg != packageName
-                }
-                
-                game?.let { launchApp(it.activityInfo.packageName) } 
-                    ?: Toast.makeText(this, "No games detected!", Toast.LENGTH_SHORT).show()
             }
 
             v.findViewById<ImageView>(R.id.btnClose).setOnClickListener { stopSelf() }
@@ -110,17 +96,17 @@ class FloatingControlService : Service() {
         packageManager.getLaunchIntentForPackage(pkg)?.let {
             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(it)
-        } ?: Toast.makeText(this, "Target app not found", Toast.LENGTH_SHORT).show()
+        } ?: Toast.makeText(this, "Game not installed!", Toast.LENGTH_SHORT).show()
     }
 
     private fun createNotification(): Notification {
-        val channelId = "pro_gfx_v4"
+        val channelId = "pro_gfx_gaming"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "GFX Engine", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(channelId, "Gaming Engine", NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Pro GFX Menu Active")
+            .setContentTitle("Pro GFX Active")
             .setSmallIcon(R.drawable.ic_launcher).build()
     }
 
