@@ -27,23 +27,24 @@ class FloatingControlService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Notification setup for Foreground
+        // 1. Foreground Notification (Oreo+ support)
         val channelId = "floating_panel_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "GFX Service", NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            val manager = getSystemService(NotificationManager::class.java) as NotificationManager
+            manager.createNotificationChannel(channel)
         }
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Pro GFX Active")
+            .setContentText("Floating control is running")
             .setSmallIcon(R.drawable.ic_launcher)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
 
         startForeground(101, notification)
 
-        // 2. Window Manager Setup
+        // 2. Window Manager Initialization
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val inflater = LayoutInflater.from(this)
 
@@ -56,34 +57,32 @@ class FloatingControlService : Service() {
                 WindowManager.LayoutParams.TYPE_PHONE
             }
 
-            // 🔥 MASTER FLAGS: Window ko har haal mein dikhane ke liye
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 layoutType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or 
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or 
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT
             )
 
             params.gravity = Gravity.TOP or Gravity.START
             params.x = 100
-            params.y = 300 // Thoda aur niche shift kiya taaki status bar se na takraye
+            params.y = 300
 
             if (floatingView?.parent == null) {
                 windowManager?.addView(floatingView, params)
             }
 
-            setupUI()
-            loadMods()
+            setupUIControls()
+            loadUserMods()
 
         } catch (e: Exception) {
             e.printStackTrace()
+            Toast.makeText(this, "Floating Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setupUI() {
+    private fun setupUIControls() {
         floatingView?.let { view ->
             val featurePage = view.findViewById<ScrollView>(R.id.featureContainer)
             
@@ -93,10 +92,11 @@ class FloatingControlService : Service() {
             }
 
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
-                packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
+                val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
+                launchIntent?.let {
                     it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(it)
-                }
+                } ?: Toast.makeText(this, "Game not found", Toast.LENGTH_SHORT).show()
             }
 
             view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
@@ -105,7 +105,7 @@ class FloatingControlService : Service() {
         }
     }
 
-    private fun loadMods() {
+    private fun loadUserMods() {
         floatingView?.let { view ->
             val container = view.findViewById<LinearLayout>(R.id.modListLayout)
             val prefs = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
