@@ -5,7 +5,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/premium_floating_bg"
-    android:padding="2dp">
+    android:padding="3dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:id="@+id/dragHandle"
@@ -13,44 +15,46 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:background="#22FFFFFF"
-        android:padding="4dp">
+        android:background="#1AFFFFFF"
+        android:padding="5dp">
 
         <ImageView android:id="@+id/btnHide" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="8dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FF1744" />
+            android:padding="9dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FF1744" />
 
         <ImageView android:id="@+id/btnRunBgmi" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="8dp" android:src="@android:drawable/ic_media_play" android:tint="#00E5FF" />
+            android:padding="9dp" android:src="@android:drawable/ic_media_play" android:tint="#00E5FF" />
 
         <ImageView android:id="@+id/btnSmartRun" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="8dp" android:src="@android:drawable/ic_dialog_dialer" android:tint="#FFD600" />
+            android:padding="9dp" android:src="@android:drawable/ic_dialog_dialer" android:tint="#FFD600" />
 
         <ImageView android:id="@+id/btnClose" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="8dp" android:src="@android:drawable/ic_menu_close_clear_cancel" android:tint="#B0BEC5" />
+            android:padding="9dp" android:src="@android:drawable/ic_menu_close_clear_cancel" android:tint="#FFFFFF" />
     </LinearLayout>
 
     <ScrollView
         android:id="@+id/featureContainer"
         android:layout_width="220dp"
         android:layout_height="250dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:layout_marginTop="5dp">
 
         <LinearLayout
             android:id="@+id/modListLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp">
-            
+            android:padding="10dp">
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ENGINE ACTIVE"
+                android:text="PRO GFX ENGINE"
                 android:textColor="#FF1744"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.2"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
