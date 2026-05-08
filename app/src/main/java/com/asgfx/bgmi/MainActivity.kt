@@ -60,7 +60,10 @@ class MainActivity : AppCompatActivity() {
                 layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
                 adapter = GameAdapter(games) { pkgName ->
                     val launchIntent = packageManager.getLaunchIntentForPackage(pkgName)
-                    if (launchIntent != null) startActivity(launchIntent)
+                    if (launchIntent != null) {
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(launchIntent)
+                    }
                 }
             }
         } else {
@@ -70,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupModWarehouse() {
         val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-        val container = findViewById<LinearLayout>(R.id.modListContainer)
+        val container = binding.modListContainer
 
         val configFolder = File(getExternalFilesDir(null), "Configs")
         if (!configFolder.exists()) configFolder.mkdirs()
@@ -86,7 +89,7 @@ class MainActivity : AppCompatActivity() {
             }
             container.addView(emptyMsg)
         } else {
-            zipFiles.take(10).forEach { file ->
+            zipFiles.forEach { file ->
                 val fileName = file.name
                 val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_list, null)
                 val tvName = modView.findViewById<TextView>(R.id.tvModItemName)
@@ -99,11 +102,10 @@ class MainActivity : AppCompatActivity() {
                 btnDelete.setOnClickListener {
                     AlertDialog.Builder(this)
                         .setTitle("Delete Config")
-                        .setMessage("Kya aap $fileName ko delete karna chahte hain?")
+                        .setMessage("Kya aap $fileName delete karna chahte hain?")
                         .setPositiveButton("Delete") { _, _ ->
                             if (file.delete()) {
                                 sharedPref.edit().remove(fileName).apply()
-                                Toast.makeText(this, "File Deleted", Toast.LENGTH_SHORT).show()
                                 setupModWarehouse()
                             }
                         }
@@ -112,8 +114,7 @@ class MainActivity : AppCompatActivity() {
 
                 swMod.setOnCheckedChangeListener { _, isChecked ->
                     sharedPref.edit().putBoolean(fileName, isChecked).apply()
-                    val status = if (isChecked) "Added to Floating Panel" else "Removed"
-                    Toast.makeText(this, "$fileName $status", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, if (isChecked) "Added" else "Removed", Toast.LENGTH_SHORT).show()
                 }
                 container.addView(modView)
             }
@@ -126,8 +127,6 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Logout")
                 .setMessage("Kya aap logout karna chahte hain?")
                 .setPositiveButton("Logout") { _, _ ->
-                    val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
-                    sharedPref.edit().clear().apply()
                     startActivity(Intent(this, LoginActivity::class.java))
                     finish()
                 }
@@ -142,9 +141,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, GraphicsActivity::class.java))
         }
 
-        // 🔥 NEW: Controller Activity Link
+        // 🔥 FIXED: Controller Button Link
         binding.btnOpenController.setOnClickListener {
-            startActivity(Intent(this, ControllerActivity::class.java))
+            val intent = Intent(this, ControllerActivity::class.java)
+            startActivity(intent)
         }
 
         binding.btnRunGame.setOnClickListener {
