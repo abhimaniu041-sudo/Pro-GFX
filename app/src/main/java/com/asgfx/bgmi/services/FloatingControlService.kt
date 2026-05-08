@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -20,94 +21,111 @@ import java.io.File
 
 class FloatingControlService : Service() {
 
-    private lateinit var windowManager: WindowManager
-    private lateinit var floatingView: View
+    private var windowManager: WindowManager? = null
+    private var floatingView: View? = null
     private var isExpanded = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
-
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        params.gravity = Gravity.TOP or Gravity.START
-        params.x = 100
-        params.y = 100
-
-        windowManager.addView(floatingView, params)
-        setupControlButtons()
-        loadDynamicModList()
-    }
-
-    private fun setupControlButtons() {
-        val featureContainer = floatingView.findViewById<ScrollView>(R.id.featureContainer)
+        val inflater = LayoutInflater.from(this)
         
-        floatingView.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
-            isExpanded = !isExpanded
-            featureContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
-        }
+        try {
+            // 1. Inflate the layout
+            floatingView = inflater.inflate(R.layout.layout_floating_control, null)
 
-        floatingView.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
-            val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
-            if (launchIntent != null) startActivity(launchIntent)
-            else Toast.makeText(this, "BGMI not installed!", Toast.LENGTH_SHORT).show()
-        }
+            // 2. Set Window Parameters (Modern Android Support)
+            val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            } else {
+                WindowManager.LayoutParams.TYPE_PHONE
+            }
 
-        floatingView.findViewById<ImageView>(R.id.btnSmartRun).setOnClickListener {
-            Toast.makeText(this, "Select Game from Smart Launcher", Toast.LENGTH_SHORT).show()
-        }
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                layoutType,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
 
-        floatingView.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
+            // Initial Position
+            params.gravity = Gravity.TOP or Gravity.START
+            params.x = 100
+            params.y = 200
+
+            // 3. Add to Window
+            windowManager?.addView(floatingView, params)
+
+            // 4. Setup Controls
+            setupControlButtons()
+            loadDynamicModList()
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_LONG).show()
             stopSelf()
         }
     }
 
-    private fun loadDynamicModList() {
-        val modContainer = floatingView.findViewById<LinearLayout>(R.id.modListLayout)
-        val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-        
-        // Scan Configs folder
-        val configFolder = File(getExternalFilesDir(null), "Configs")
-        val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
+    private fun setupControlButtons() {
+        floatingView?.let { view ->
+            val featureContainer = view.findViewById<ScrollView>(R.id.featureContainer)
+            
+            view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
+                isExpanded = !isExpanded
+                featureContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
+            }
 
-        modContainer.removeAllViews()
-
-        zipFiles?.forEach { file ->
-            val fileName = file.name
-            // Check if user enabled this file in Main App
-            if (sharedPref.getBoolean(fileName, false)) {
-                val modItem = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
-                val tvName = modItem.findViewById<TextView>(R.id.tvModName)
-                val swMod = modItem.findViewById<SwitchCompat>(R.id.swModApply)
-
-                tvName.text = fileName
-                swMod.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) applyMod(fileName) else removeMod(fileName)
+            view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
+                val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
+                if (launchIntent != null) {
+                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(launchIntent)
+                } else {
+                    Toast.makeText(this, "BGMI not installed!", Toast.LENGTH_SHORT).show()
                 }
-                modContainer.addView(modItem)
+            }
+
+            view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
+                stopSelf()
             }
         }
     }
 
-    private fun applyMod(name: String) {
-        Toast.makeText(this, "Applying: $name", Toast.LENGTH_SHORT).show()
-        // Shizuku logic for unzipping $name will go here
-    }
+    private fun loadDynamicModList() {
+        floatingView?.let { view ->
+            val modContainer = view.findViewById<LinearLayout>(R.id.modListLayout)
+            val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
+            
+            val configFolder = File(getExternalFilesDir(null), "Configs")
+            val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
 
-    private fun removeMod(name: String) {
-        Toast.makeText(this, "Removed: $name", Toast.LENGTH_SHORT).show()
+            modContainer.removeAllViews()
+
+            zipFiles?.forEach { file ->
+                val fileName = file.name
+                if (sharedPref.getBoolean(fileName, false)) {
+                    val modItem = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
+                    val tvName = modItem.findViewById<TextView>(R.id.tvModName)
+                    val swMod = modItem.findViewById<SwitchCompat>(R.id.swModApply)
+
+                    tvName.text = fileName
+                    swMod.setOnCheckedChangeListener { _, isChecked ->
+                        Toast.makeText(this, "${if (isChecked) "Applying" else "Removing"} $fileName", Toast.LENGTH_SHORT).show()
+                    }
+                    modContainer.addView(modItem)
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (::floatingView.isInitialized) windowManager.removeView(floatingView)
+        floatingView?.let {
+            windowManager?.removeView(it)
+        }
     }
 }
