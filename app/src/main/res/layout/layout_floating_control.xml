@@ -1,60 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rootLayout"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/premium_floating_bg"
-    android:padding="3dp"
-    android:clickable="true"
-    android:focusable="true">
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/collapsedIcon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_launcher"
+        android:background="@drawable/premium_floating_bg"
+        android:padding="8dp"
+        android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/dragHandle"
+        android:id="@+id/expandedMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:background="#1AFFFFFF"
-        android:padding="5dp">
-
-        <ImageView android:id="@+id/btnHide" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="9dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FF1744" />
-
-        <ImageView android:id="@+id/btnRunBgmi" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="9dp" android:src="@android:drawable/ic_media_play" android:tint="#00E5FF" />
-
-        <ImageView android:id="@+id/btnSmartRun" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="9dp" android:src="@android:drawable/ic_dialog_dialer" android:tint="#FFD600" />
-
-        <ImageView android:id="@+id/btnClose" android:layout_width="40dp" android:layout_height="40dp"
-            android:padding="9dp" android:src="@android:drawable/ic_menu_close_clear_cancel" android:tint="#FFFFFF" />
-    </LinearLayout>
-
-    <ScrollView
-        android:id="@+id/featureContainer"
-        android:layout_width="220dp"
-        android:layout_height="250dp"
-        android:visibility="gone"
-        android:layout_marginTop="5dp">
+        android:orientation="vertical"
+        android:background="@drawable/premium_floating_bg"
+        android:padding="4dp">
 
         <LinearLayout
-            android:id="@+id/modListLayout"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="#1AFFFFFF"
+            android:padding="6dp">
 
-            <TextView
+            <ImageView android:id="@+id/btnHide" android:layout_width="38dp" android:layout_height="38dp"
+                android:padding="8dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FF1744" />
+
+            <ImageView android:id="@+id/btnRunBgmi" android:layout_width="38dp" android:layout_height="38dp"
+                android:padding="8dp" android:src="@android:drawable/ic_media_play" android:tint="#00E5FF" />
+
+            <ImageView android:id="@+id/btnSmartRun" android:layout_width="38dp" android:layout_height="38dp"
+                android:padding="8dp" android:src="@android:drawable/ic_dialog_dialer" android:tint="#FFD600" />
+
+            <ImageView android:id="@+id/btnClose" android:layout_width="38dp" android:layout_height="38dp"
+                android:padding="8dp" android:src="@android:drawable/ic_menu_close_clear_cancel" android:tint="#FFFFFF" />
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/featureContainer"
+            android:layout_width="210dp"
+            android:layout_height="240dp"
+            android:layout_marginTop="5dp">
+
+            <LinearLayout
+                android:id="@+id/modListLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="PRO GFX ENGINE"
-                android:textColor="#FF1744"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="10dp"
-                android:letterSpacing="0.2"/>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+                android:orientation="vertical"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ZENITH ENGINE ACTIVE"
+                    android:textColor="#FF1744"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:letterSpacing="0.2"/>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>
