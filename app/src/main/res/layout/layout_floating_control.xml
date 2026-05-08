@@ -5,22 +5,20 @@
 
     <ImageView
         android:id="@+id/collapsedIcon"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:src="@drawable/ic_launcher"
         android:background="@drawable/premium_floating_bg"
         android:padding="10dp"
-        android:elevation="10dp"
         android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/expandedMenu"
-        android:layout_width="240dp"
+        android:layout_width="245dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/premium_floating_bg"
-        android:padding="2dp"
-        android:elevation="8dp">
+        android:padding="2dp">
 
         <LinearLayout
             android:id="@+id/controlBar"
@@ -28,68 +26,28 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="#1AFFFFFF"
-            android:padding="4dp">
+            android:background="#22FFFFFF"
+            android:padding="5dp">
 
             <ImageView android:id="@+id/btnHide" android:layout_width="36dp" android:layout_height="36dp"
                 android:padding="8dp" android:src="@android:drawable/ic_menu_sort_by_size" android:tint="#FF1744" />
-
             <ImageView android:id="@+id/btnRunBgmi" android:layout_width="36dp" android:layout_height="36dp"
                 android:padding="8dp" android:src="@android:drawable/ic_media_play" android:tint="#00E5FF" />
-
             <ImageView android:id="@+id/btnSmartRun" android:layout_width="36dp" android:layout_height="36dp"
                 android:padding="8dp" android:src="@android:drawable/ic_dialog_dialer" android:tint="#FFD600" />
-
             <ImageView android:id="@+id/btnClose" android:layout_width="36dp" android:layout_height="36dp"
                 android:padding="8dp" android:src="@android:drawable/ic_menu_close_clear_cancel" android:tint="#FFFFFF" />
         </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="280dp">
-
-            <ScrollView
-                android:id="@+id/modsView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible">
-                <LinearLayout
-                    android:id="@+id/modListLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="10dp" />
+        <FrameLayout android:layout_width="match_parent" android:layout_height="280dp">
+            <ScrollView android:id="@+id/modsView" android:layout_width="match_parent" android:layout_height="match_parent">
+                <LinearLayout android:id="@+id/modListLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="10dp" />
             </ScrollView>
 
-            <ScrollView
-                android:id="@+id/gamesView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#F2000000"
-                android:visibility="gone">
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                    
-                    <TextView
-                        android:id="@+id/btnBackToMods"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="← BACK TO MODS"
-                        android:textColor="#00E5FF"
-                        android:textSize="10sp"
-                        android:gravity="center"
-                        android:padding="10dp"
-                        android:background="#22FFFFFF"/>
-
-                    <GridLayout
-                        android:id="@+id/gameGrid"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="3"
-                        android:padding="10dp"
-                        android:alignmentMode="alignMargins" />
+            <ScrollView android:id="@+id/gamesView" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#F2000000" android:visibility="gone">
+                <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <TextView android:id="@+id/btnBackToMods" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="← BACK TO ENGINE" android:textColor="#00E5FF" android:textSize="10sp" android:gravity="center" android:padding="12dp" android:background="#1AFFFFFF"/>
+                    <GridLayout android:id="@+id/gameGrid" android:layout_width="match_parent" android:layout_height="wrap_content" android:columnCount="3" android:padding="8dp" />
                 </LinearLayout>
             </ScrollView>
         </FrameLayout>
