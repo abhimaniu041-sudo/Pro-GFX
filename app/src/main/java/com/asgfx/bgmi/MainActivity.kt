@@ -3,6 +3,7 @@ package com.asgfx.bgmi
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         setupStatus()
         setupClickListeners()
         initGameLauncher()
-        setupModWarehouse() 
+        setupModWarehouse()
     }
 
     private fun setupStatus() {
@@ -75,7 +76,6 @@ class MainActivity : AppCompatActivity() {
         if (!configFolder.exists()) configFolder.mkdirs()
 
         val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
-        
         container.removeAllViews() 
 
         if (zipFiles.isNullOrEmpty()) {
@@ -96,7 +96,6 @@ class MainActivity : AppCompatActivity() {
                 tvName.text = fileName 
                 swMod.isChecked = sharedPref.getBoolean(fileName, false)
 
-                // 🔥 Delete Logic: Config hamesha ke liye remove karne ke liye
                 btnDelete.setOnClickListener {
                     AlertDialog.Builder(this)
                         .setTitle("Delete Config")
@@ -105,11 +104,10 @@ class MainActivity : AppCompatActivity() {
                             if (file.delete()) {
                                 sharedPref.edit().remove(fileName).apply()
                                 Toast.makeText(this, "File Deleted", Toast.LENGTH_SHORT).show()
-                                setupModWarehouse() // Refresh list
+                                setupModWarehouse()
                             }
                         }
-                        .setNegativeButton("Cancel", null)
-                        .show()
+                        .setNegativeButton("Cancel", null).show()
                 }
 
                 swMod.setOnCheckedChangeListener { _, isChecked ->
@@ -133,8 +131,7 @@ class MainActivity : AppCompatActivity() {
                     startActivity(Intent(this, LoginActivity::class.java))
                     finish()
                 }
-                .setNegativeButton("Cancel", null)
-                .show()
+                .setNegativeButton("Cancel", null).show()
         }
 
         binding.btnSensitivity.setOnClickListener {
@@ -159,7 +156,13 @@ class MainActivity : AppCompatActivity() {
                 val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
                 startActivity(intent)
             } else {
-                startService(Intent(this, FloatingControlService::class.java))
+                // 🔥 Updated: Support for Foreground Service start
+                val serviceIntent = Intent(this, FloatingControlService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent)
+                } else {
+                    startService(serviceIntent)
+                }
                 Toast.makeText(this, "Floating Panel Active", Toast.LENGTH_SHORT).show()
             }
         }
