@@ -39,10 +39,11 @@ class FloatingControlService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 100; y = 300
+            x = 100
+            y = 300
         }
 
-        // 🔥 FIXED MOVE LOGIC: Control bar se drag karne par smoothly move hoga
+        // 🔥 FIXED MOVE LOGIC: Control bar handle se smoothly move hoga
         floatingView?.findViewById<View>(R.id.controlBar)?.setOnTouchListener { _, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
@@ -105,8 +106,8 @@ class FloatingControlService : Service() {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER)
         val apps = pm.queryIntentActivities(mainIntent, 0)
 
-        // 🔥 Added "once" and "human" keywords for your game
-        val gameKeywords = listOf("game", "pubg", "mobile", "freefire", "cod", "once", "human", "battle", "starry")
+        // 🔥 Improved Detection for Once Human and other heavy games
+        val gameKeywords = listOf("game", "pubg", "mobile", "freefire", "cod", "once", "human", "battle", "starry", "genshin")
 
         for (app in apps) {
             val pkg = app.activityInfo.packageName.lowercase()
@@ -121,20 +122,21 @@ class FloatingControlService : Service() {
                 }
 
                 val icon = ImageView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(100, 100)
+                    val size = (45 * resources.displayMetrics.density).toInt()
+                    layoutParams = LinearLayout.LayoutParams(size, size)
                     setImageDrawable(app.loadIcon(pm))
                 }
 
-                val title = TextView(this).apply {
+                val titleText = TextView(this).apply {
                     text = app.loadLabel(pm).toString().take(7) + ".."
-                    setTextColor(0xFFFFFFFF.toInt())
-                    textSize = 9sp
+                    setTextColor(-1) // white
+                    textSize = 10f // Fixed build error (removed sp)
                     gravity = Gravity.CENTER
                     setPadding(0, 5, 0, 0)
                 }
 
                 item.addView(icon)
-                item.addView(title)
+                item.addView(titleText)
                 grid.addView(item)
             }
         }
@@ -148,7 +150,7 @@ class FloatingControlService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val channelId = "zenith_pro"
+        val channelId = "zenith_v5"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Zenith Engine", NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
