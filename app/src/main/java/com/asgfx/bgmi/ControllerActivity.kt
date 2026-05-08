@@ -1,41 +1,44 @@
 package com.asgfx.bgmi
 
 import android.annotation.SuppressLint
+import android.bluetooth.*
 import android.content.Context
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
 
 class ControllerActivity : AppCompatActivity() {
 
-    private val tvIpAddress = "192.168.1.2" // 🔥 Updated from your screenshot
-    private val port = 8888
-    private var socket: DatagramSocket? = null
+    private var hidDevice: BluetoothHidDevice? = null
     private var isEditMode = false
+    private val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+
+    // 📝 HID Byte Codes (Standard Gamepad Buttons)
+    private val BUTTON_A = 0x01
+    private val BUTTON_B = 0x02
+    private val BUTTON_X = 0x04
+    private val BUTTON_Y = 0x08
+    private val BUTTON_L1 = 0x10
+    private val BUTTON_R1 = 0x20
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_controller)
 
-        Thread { socket = DatagramSocket() }.start()
+        setupBluetoothHID()
 
-        // Match these IDs with XML
         val bgmiControls = mapOf(
-            R.id.btn_fire to "KEY_FIRE",
-            R.id.btn_scope to "KEY_SCOPE",
-            R.id.btn_jump to "KEY_JUMP",
-            R.id.btn_crouch to "KEY_CROUCH",
-            R.id.btn_prone to "KEY_PRONE",
-            R.id.btn_reload to "KEY_RELOAD",
-            R.id.btn_peek_left to "KEY_PEEK_L",
-            R.id.btn_peek_right to "KEY_PEEK_R",
-            R.id.btn_sprint to "KEY_SPRINT",
-            R.id.joystick_base to "JOY_MOVE"
+            R.id.btn_fire to BUTTON_X,      // Fire -> X
+            R.id.btn_scope to BUTTON_Y,     // Scope -> Y
+            R.id.btn_jump to BUTTON_A,      // Jump -> A
+            R.id.btn_crouch to BUTTON_B,    // Crouch -> B
+            R.id.btn_reload to BUTTON_R1,   // Reload -> R1
+            R.id.btn_peek_left to 0x40,
+            R.id.btn_peek_right to 0x80,
+            R.id.btn_sprint to BUTTON_L1,
+            R.id.joystick_base to 0x00      // Joystick handled separately
         )
 
         bgmiControls.forEach { (id, cmd) ->
@@ -52,8 +55,22 @@ class ControllerActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupBluetoothHID() {
+        btAdapter?.getProfileProxy(this, object : BluetoothProfile.ServiceListener {
+            override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                if (profile == BluetoothProfile.HID_DEVICE) {
+                    hidDevice = proxy as BluetoothHidDevice
+                    Toast.makeText(this@ControllerActivity, "HID Ready: Pair with TV", Toast.LENGTH_LONG).show()
+                }
+            }
+            override fun onServiceDisconnected(profile: Int) {
+                hidDevice = null
+            }
+        }, BluetoothProfile.HID_DEVICE)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
-    private fun setupGamingTouch(view: View, command: String) {
+    private fun setupGamingTouch(view: View, hidCode: Int) {
         var dX = 0f
         var dY = 0f
 
@@ -65,22 +82,24 @@ class ControllerActivity : AppCompatActivity() {
                     MotionEvent.ACTION_UP -> savePosition(v, v.id.toString())
                 }
             } else {
+                // 🔥 Send Bluetooth HID Report
                 when (event.action) {
-                    MotionEvent.ACTION_DOWN -> sendCommand("${command}_START")
-                    MotionEvent.ACTION_UP -> sendCommand("${command}_STOP")
+                    MotionEvent.ACTION_DOWN -> sendHidReport(hidCode, true)
+                    MotionEvent.ACTION_UP -> sendHidReport(hidCode, false)
                 }
             }
             true
         }
     }
 
-    private fun sendCommand(msg: String) {
-        Thread {
-            try {
-                val packet = DatagramPacket(msg.toByteArray(), msg.length, InetAddress.getByName(tvIpAddress), port)
-                socket?.send(packet)
-            } catch (e: Exception) { e.printStackTrace() }
-        }.start()
+    private fun sendHidReport(buttonCode: Int, isPressed: Boolean) {
+        // Bhai, ye report TV ko bhejega ki button daba hai ya nahi
+        // Bluetooth pairing ke baad TV ise turant respond karega
+        val report = ByteArray(3)
+        report[0] = if (isPressed) buttonCode.toByte() else 0x00
+        hidDevice?.getConnectedDevices()?.forEach { device ->
+            hidDevice?.sendReport(device, 1, report)
+        }
     }
 
     private fun savePosition(v: View, key: String) {
