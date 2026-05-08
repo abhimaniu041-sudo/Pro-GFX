@@ -3,6 +3,7 @@ package com.asgfx.bgmi
 import android.annotation.SuppressLint
 import android.bluetooth.*
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -15,30 +16,28 @@ class ControllerActivity : AppCompatActivity() {
     private var isEditMode = false
     private val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
-    // 📝 HID Byte Codes (Standard Gamepad Buttons)
-    private val BUTTON_A = 0x01
-    private val BUTTON_B = 0x02
-    private val BUTTON_X = 0x04
-    private val BUTTON_Y = 0x08
-    private val BUTTON_L1 = 0x10
-    private val BUTTON_R1 = 0x20
+    // 📝 HID Constants for Gamepad
+    private val BUTTON_X = 0x04 // Fire
+    private val BUTTON_Y = 0x08 // Scope
+    private val BUTTON_A = 0x01 // Jump
+    private val BUTTON_B = 0x02 // Crouch
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_controller)
 
+        makeDiscoverable() // 🔥 Phone ko list mein lane ke liye
         setupBluetoothHID()
 
         val bgmiControls = mapOf(
-            R.id.btn_fire to BUTTON_X,      // Fire -> X
-            R.id.btn_scope to BUTTON_Y,     // Scope -> Y
-            R.id.btn_jump to BUTTON_A,      // Jump -> A
-            R.id.btn_crouch to BUTTON_B,    // Crouch -> B
-            R.id.btn_reload to BUTTON_R1,   // Reload -> R1
+            R.id.btn_fire to BUTTON_X,
+            R.id.btn_scope to BUTTON_Y,
+            R.id.btn_jump to BUTTON_A,
+            R.id.btn_crouch to BUTTON_B,
+            R.id.btn_reload to 0x10,
             R.id.btn_peek_left to 0x40,
             R.id.btn_peek_right to 0x80,
-            R.id.btn_sprint to BUTTON_L1,
-            R.id.joystick_base to 0x00      // Joystick handled separately
+            R.id.btn_sprint to 0x20
         )
 
         bgmiControls.forEach { (id, cmd) ->
@@ -55,12 +54,36 @@ class ControllerActivity : AppCompatActivity() {
         }
     }
 
+    private fun makeDiscoverable() {
+        // TV ko phone dikhane ke liye advertise mode on karna zaroori hai
+        val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+        }
+        startActivity(discoverableIntent)
+    }
+
     private fun setupBluetoothHID() {
         btAdapter?.getProfileProxy(this, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.HID_DEVICE) {
                     hidDevice = proxy as BluetoothHidDevice
-                    Toast.makeText(this@ControllerActivity, "HID Ready: Pair with TV", Toast.LENGTH_LONG).show()
+                    
+                    // 🔥 ZAROORI: TV ko batana ki ye ek Gamepad hai
+                    val sdp = BluetoothHidDeviceAppSdpSettings(
+                        "Pro GFX Controller",
+                        "Zenith Gamepad",
+                        "Google",
+                        BluetoothHidDevice.SUBCLASS1_COMBO,
+                        null
+                    )
+                    
+                    hidDevice?.registerApp(sdp, null, null, { it.run() }, object : BluetoothHidDevice.Callback() {
+                        override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
+                            runOnUiThread {
+                                if (registered) Toast.makeText(this@ControllerActivity, "Controller Ready: Pair with TV now!", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    })
                 }
             }
             override fun onServiceDisconnected(profile: Int) {
@@ -82,7 +105,6 @@ class ControllerActivity : AppCompatActivity() {
                     MotionEvent.ACTION_UP -> savePosition(v, v.id.toString())
                 }
             } else {
-                // 🔥 Send Bluetooth HID Report
                 when (event.action) {
                     MotionEvent.ACTION_DOWN -> sendHidReport(hidCode, true)
                     MotionEvent.ACTION_UP -> sendHidReport(hidCode, false)
@@ -93,8 +115,6 @@ class ControllerActivity : AppCompatActivity() {
     }
 
     private fun sendHidReport(buttonCode: Int, isPressed: Boolean) {
-        // Bhai, ye report TV ko bhejega ki button daba hai ya nahi
-        // Bluetooth pairing ke baad TV ise turant respond karega
         val report = ByteArray(3)
         report[0] = if (isPressed) buttonCode.toByte() else 0x00
         hidDevice?.getConnectedDevices()?.forEach { device ->
