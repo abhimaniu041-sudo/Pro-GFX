@@ -28,7 +28,7 @@ class FloatingControlService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Start Foreground First (Android 8.0+ ke liye compulsory hai)
+        // 1. Start Foreground First (Oreo+ support)
         runAsForeground()
 
         // 2. Initialize Window Manager
@@ -44,7 +44,7 @@ class FloatingControlService : Service() {
                 WindowManager.LayoutParams.TYPE_PHONE
             }
 
-            // Fixed Dimensions taaki hidden na rahe
+            // Fixed Dimensions for visibility
             val params = WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -77,9 +77,11 @@ class FloatingControlService : Service() {
             manager?.createNotificationChannel(channel)
         }
 
+        // 🔥 Fixed: Using drawable instead of mipmap to avoid build error
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Pro GFX Active")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentText("Control panel is running")
+            .setSmallIcon(R.drawable.ic_launcher) 
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .build()
 
@@ -93,13 +95,14 @@ class FloatingControlService : Service() {
             view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
                 featurePage.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                Toast.makeText(this, if(isExpanded) "Menu Opened" else "Menu Hidden", Toast.LENGTH_SHORT).show()
             }
 
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
                 packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
                     it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(it)
-                }
+                } ?: Toast.makeText(this, "BGMI Not Installed", Toast.LENGTH_SHORT).show()
             }
 
             view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
@@ -112,13 +115,21 @@ class FloatingControlService : Service() {
         floatingView?.let { view ->
             val container = view.findViewById<LinearLayout>(R.id.modListLayout)
             val prefs = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-            val files = File(getExternalFilesDir(null), "Configs").listFiles { f -> f.extension == "zip" }
+            val configFolder = File(getExternalFilesDir(null), "Configs")
+            val files = configFolder.listFiles { f -> f.extension == "zip" }
 
             container.removeAllViews()
             files?.forEach { file ->
                 if (prefs.getBoolean(file.name, false)) {
                     val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
                     modView.findViewById<TextView>(R.id.tvModName).text = file.name
+                    
+                    val sw = modView.findViewById<SwitchCompat>(R.id.swModApply)
+                    sw.setOnCheckedChangeListener { _, isChecked ->
+                        val msg = if(isChecked) "Applying ${file.name}" else "Removing ${file.name}"
+                        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                    }
+                    
                     container.addView(modView)
                 }
             }
@@ -127,6 +138,10 @@ class FloatingControlService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingView?.let { windowManager?.removeView(it) }
+        floatingView?.let { 
+            try {
+                windowManager?.removeView(it) 
+            } catch (e: Exception) { }
+        }
     }
 }
