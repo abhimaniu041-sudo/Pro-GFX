@@ -42,40 +42,25 @@ class FloatingControlService : Service() {
             x = 100; y = 300
         }
 
-        // 🔥 MASTER DRAG LOGIC (Smooth & Precise)
-        floatingView?.setOnTouchListener(object : View.OnTouchListener {
-            private var lastAction = 0
-            override fun onTouch(v: View, event: MotionEvent): Boolean {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        initialX = params.x
-                        initialY = params.y
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
-                        lastAction = MotionEvent.ACTION_DOWN
-                        return true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        val dx = (event.rawX - initialTouchX).toInt()
-                        val dy = (event.rawY - initialTouchY).toInt()
-                        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-                            params.x = initialX + dx
-                            params.y = initialY + dy
-                            windowManager.updateViewLayout(floatingView, params)
-                            lastAction = MotionEvent.ACTION_MOVE
-                        }
-                        return true
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (lastAction == MotionEvent.ACTION_DOWN) {
-                            v.performClick() // Trigger buttons if not moved
-                        }
-                        return true
-                    }
+        // 🔥 FIXED MOVE LOGIC: Control bar se drag karne par smoothly move hoga
+        floatingView?.findViewById<View>(R.id.controlBar)?.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    true
                 }
-                return false
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(floatingView, params)
+                    true
+                }
+                else -> false
             }
-        })
+        }
 
         setupUI()
         windowManager.addView(floatingView, params)
@@ -89,7 +74,6 @@ class FloatingControlService : Service() {
             val gamesView = v.findViewById<View>(R.id.gamesView)
             val gameGrid = v.findViewById<GridLayout>(R.id.gameGrid)
 
-            // Minimize Logic
             v.findViewById<View>(R.id.btnHide).setOnClickListener {
                 expandedMenu.visibility = View.GONE
                 collapsedIcon.visibility = View.VISIBLE
@@ -99,14 +83,12 @@ class FloatingControlService : Service() {
                 expandedMenu.visibility = View.VISIBLE
             }
 
-            // Game Launcher Toggle
             v.findViewById<View>(R.id.btnSmartRun).setOnClickListener {
                 modsView.visibility = View.GONE
                 gamesView.visibility = View.VISIBLE
                 loadGamesGrid(gameGrid)
             }
 
-            // Back to Mods
             v.findViewById<View>(R.id.btnBackToMods).setOnClickListener {
                 gamesView.visibility = View.GONE
                 modsView.visibility = View.VISIBLE
@@ -123,32 +105,36 @@ class FloatingControlService : Service() {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).addCategory(Intent.CATEGORY_LAUNCHER)
         val apps = pm.queryIntentActivities(mainIntent, 0)
 
+        // 🔥 Added "once" and "human" keywords for your game
+        val gameKeywords = listOf("game", "pubg", "mobile", "freefire", "cod", "once", "human", "battle", "starry")
+
         for (app in apps) {
-            val pkg = app.activityInfo.packageName
-            // Simple Game Detection (Filter common ones)
-            if (pkg.contains("game") || pkg.contains("pubg") || pkg.contains("mobile") || pkg.contains("freefire") || pkg.contains("cod")) {
-                
+            val pkg = app.activityInfo.packageName.lowercase()
+            val label = app.loadLabel(pm).toString().lowercase()
+            
+            if (gameKeywords.any { pkg.contains(it) || label.contains(it) }) {
                 val item = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
                     gravity = Gravity.CENTER
-                    setPadding(10, 10, 10, 10)
-                    setOnClickListener { launchApp(pkg) }
+                    setPadding(12, 12, 12, 12)
+                    setOnClickListener { launchApp(app.activityInfo.packageName) }
                 }
 
                 val icon = ImageView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(90, 90)
+                    layoutParams = LinearLayout.LayoutParams(100, 100)
                     setImageDrawable(app.loadIcon(pm))
                 }
 
-                val label = TextView(this).apply {
-                    text = app.loadLabel(pm).toString().take(8) + ".."
+                val title = TextView(this).apply {
+                    text = app.loadLabel(pm).toString().take(7) + ".."
                     setTextColor(0xFFFFFFFF.toInt())
-                    textSize = 8f
+                    textSize = 9sp
                     gravity = Gravity.CENTER
+                    setPadding(0, 5, 0, 0)
                 }
 
                 item.addView(icon)
-                item.addView(label)
+                item.addView(title)
                 grid.addView(item)
             }
         }
@@ -162,12 +148,12 @@ class FloatingControlService : Service() {
     }
 
     private fun createNotification(): Notification {
-        val channelId = "zenith_v2"
+        val channelId = "zenith_pro"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId, "Zenith Engine", NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
-        return NotificationCompat.Builder(this, channelId).setContentTitle("Zenith Active").setSmallIcon(R.drawable.ic_launcher).build()
+        return NotificationCompat.Builder(this, channelId).setContentTitle("Zenith Engine Active").setSmallIcon(R.drawable.ic_launcher).build()
     }
 
     override fun onDestroy() {
