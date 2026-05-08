@@ -1,11 +1,9 @@
 package com.asgfx.bgmi.services
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
@@ -13,11 +11,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.NotificationCompat
 import com.asgfx.bgmi.R
@@ -34,21 +28,13 @@ class FloatingControlService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 🔥 1. Start Foreground Service with Notification
-        createNotificationChannel()
-        val notification = NotificationCompat.Builder(this, "floating_channel")
-            .setContentTitle("Pro GFX Active")
-            .setContentText("Floating panel is running")
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .build()
-        
-        startForeground(1, notification)
+        // 1. Start Foreground First (Android 8.0+ ke liye compulsory hai)
+        runAsForeground()
 
-        // 🔥 2. Setup Floating Window
+        // 2. Initialize Window Manager
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val inflater = LayoutInflater.from(this)
-        
+
         try {
             floatingView = inflater.inflate(R.layout.layout_floating_control, null)
 
@@ -58,57 +44,61 @@ class FloatingControlService : Service() {
                 WindowManager.LayoutParams.TYPE_PHONE
             }
 
-            val params = WindowManager.LayoutParams()
-            params.type = layoutType
-            params.format = PixelFormat.TRANSLUCENT
-            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-            
+            // Fixed Dimensions taaki hidden na rahe
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                layoutType,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+
             params.gravity = Gravity.TOP or Gravity.START
-            params.x = 50
+            params.x = 100
             params.y = 200
-            params.width = WindowManager.LayoutParams.WRAP_CONTENT
-            params.height = WindowManager.LayoutParams.WRAP_CONTENT
 
             if (floatingView?.parent == null) {
                 windowManager?.addView(floatingView, params)
             }
 
-            setupControlButtons()
-            loadDynamicModList()
+            setupUI()
+            loadMods()
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Layout Error: ${e.message}", Toast.LENGTH_LONG).show()
-            stopSelf()
+            e.printStackTrace()
         }
     }
 
-    // 🔥 Notification Channel banana zaroori hai Android 8+ ke liye
-    private fun createNotificationChannel() {
+    private fun runAsForeground() {
+        val channelId = "floating_panel_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val serviceChannel = NotificationChannel(
-                "floating_channel",
-                "Floating Service Channel",
-                NotificationManager.IMPORTANCE_LOW
-            )
+            val channel = NotificationChannel(channelId, "GFX Floating Service", NotificationManager.IMPORTANCE_MIN)
             val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(serviceChannel)
+            manager?.createNotificationChannel(channel)
         }
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Pro GFX Active")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .build()
+
+        startForeground(101, notification)
     }
 
-    private fun setupControlButtons() {
+    private fun setupUI() {
         floatingView?.let { view ->
-            val featureContainer = view.findViewById<ScrollView>(R.id.featureContainer)
+            val featurePage = view.findViewById<ScrollView>(R.id.featureContainer)
             
             view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
-                featureContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                featurePage.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
 
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
-                val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
-                if (launchIntent != null) {
-                    launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(launchIntent)
+                packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
+                    it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(it)
                 }
             }
 
@@ -118,27 +108,18 @@ class FloatingControlService : Service() {
         }
     }
 
-    private fun loadDynamicModList() {
+    private fun loadMods() {
         floatingView?.let { view ->
-            val modContainer = view.findViewById<LinearLayout>(R.id.modListLayout)
-            val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-            val configFolder = File(getExternalFilesDir(null), "Configs")
-            val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
+            val container = view.findViewById<LinearLayout>(R.id.modListLayout)
+            val prefs = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
+            val files = File(getExternalFilesDir(null), "Configs").listFiles { f -> f.extension == "zip" }
 
-            modContainer.removeAllViews()
-
-            zipFiles?.forEach { file ->
-                val fileName = file.name
-                if (sharedPref.getBoolean(fileName, false)) {
-                    val modItem = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
-                    val tvName = modItem.findViewById<TextView>(R.id.tvModName)
-                    val swMod = modItem.findViewById<SwitchCompat>(R.id.swModApply)
-
-                    tvName.text = fileName
-                    swMod.setOnCheckedChangeListener { _, isChecked ->
-                        Toast.makeText(this, "${if (isChecked) "Applied" else "Removed"} $fileName", Toast.LENGTH_SHORT).show()
-                    }
-                    modContainer.addView(modItem)
+            container.removeAllViews()
+            files?.forEach { file ->
+                if (prefs.getBoolean(file.name, false)) {
+                    val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
+                    modView.findViewById<TextView>(R.id.tvModName).text = file.name
+                    container.addView(modView)
                 }
             }
         }
@@ -146,10 +127,6 @@ class FloatingControlService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        floatingView?.let {
-            try {
-                windowManager?.removeView(it)
-            } catch (e: Exception) { }
-        }
+        floatingView?.let { windowManager?.removeView(it) }
     }
 }
