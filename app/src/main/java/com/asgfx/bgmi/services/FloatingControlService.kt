@@ -34,30 +34,29 @@ class FloatingControlService : Service() {
         val inflater = LayoutInflater.from(this)
         
         try {
-            // 1. Inflate the layout
+            // 1. Inflate the floating layout
             floatingView = inflater.inflate(R.layout.layout_floating_control, null)
 
-            // 2. Set Window Parameters (Explicit Width/Height)
+            // 2. Set Window Parameters with exact positions
             val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             } else {
                 WindowManager.LayoutParams.TYPE_PHONE
             }
 
-            val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT, // Width
-                WindowManager.LayoutParams.WRAP_CONTENT, // Height
-                layoutType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-            )
+            val params = WindowManager.LayoutParams()
+            params.type = layoutType
+            params.format = PixelFormat.TRANSLUCENT
+            params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+            
+            // 🔥 FIXED: Positioning and Size as you requested
+            params.gravity = Gravity.TOP or Gravity.START
+            params.x = 50
+            params.y = 200
+            params.width = WindowManager.LayoutParams.WRAP_CONTENT
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT
 
-            // Screen ke beech mein dikhane ke liye (Debug ke liye best hai)
-            params.gravity = Gravity.CENTER 
-            params.x = 0
-            params.y = 0
-
-            // 3. Important: Check if view already added
+            // 3. Add view to Window Manager safely
             if (floatingView?.parent == null) {
                 windowManager?.addView(floatingView, params)
             }
@@ -75,24 +74,31 @@ class FloatingControlService : Service() {
         floatingView?.let { view ->
             val featureContainer = view.findViewById<ScrollView>(R.id.featureContainer)
             
-            // Toggle Logic
+            // HIDE/EXPAND Toggle Logic
             view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
                 featureContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                val status = if (isExpanded) "Menu Opened" else "Menu Hidden"
+                Toast.makeText(this, status, Toast.LENGTH_SHORT).show()
             }
 
-            // Quick Run BGMI
+            // BGMI QUICK RUN
             view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
                 val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
                 if (launchIntent != null) {
                     launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(launchIntent)
                 } else {
-                    Toast.makeText(this, "BGMI Not Installed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "BGMI Not Installed!", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            // Close Logic
+            // SMART RUN
+            view.findViewById<ImageView>(R.id.btnSmartRun).setOnClickListener {
+                Toast.makeText(this, "Smart Run: Select Game", Toast.LENGTH_SHORT).show()
+            }
+
+            // CLOSE SERVICE
             view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
                 stopSelf()
             }
@@ -104,6 +110,7 @@ class FloatingControlService : Service() {
             val modContainer = view.findViewById<LinearLayout>(R.id.modListLayout)
             val sharedPref = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
             
+            // Scan Configs folder for .zip files
             val configFolder = File(getExternalFilesDir(null), "Configs")
             val zipFiles = configFolder.listFiles { file -> file.extension == "zip" }
 
@@ -111,7 +118,7 @@ class FloatingControlService : Service() {
 
             zipFiles?.forEach { file ->
                 val fileName = file.name
-                // Check if mod was enabled in MainActivity
+                // Wahi dikhao jo MainActivity mein enable kiya gaya hai
                 if (sharedPref.getBoolean(fileName, false)) {
                     val modItem = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
                     val tvName = modItem.findViewById<TextView>(R.id.tvModName)
@@ -119,7 +126,8 @@ class FloatingControlService : Service() {
 
                     tvName.text = fileName
                     swMod.setOnCheckedChangeListener { _, isChecked ->
-                        Toast.makeText(this, "${if (isChecked) "Applied" else "Removed"} $fileName", Toast.LENGTH_SHORT).show()
+                        val action = if (isChecked) "Applied" else "Removed"
+                        Toast.makeText(this, "$action $fileName", Toast.LENGTH_SHORT).show()
                     }
                     modContainer.addView(modItem)
                 }
@@ -129,11 +137,11 @@ class FloatingControlService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (floatingView != null && windowManager != null) {
+        floatingView?.let {
             try {
-                windowManager?.removeView(floatingView)
+                windowManager?.removeView(it)
             } catch (e: Exception) {
-                // View already removed or not added
+                // View already removed
             }
         }
     }
