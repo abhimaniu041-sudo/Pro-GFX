@@ -16,18 +16,29 @@ class ControllerActivity : AppCompatActivity() {
     private var isEditMode = false
     private val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
-    // 📝 HID Constants for Gamepad
-    private val BUTTON_X = 0x04 // Fire
-    private val BUTTON_Y = 0x08 // Scope
-    private val BUTTON_A = 0x01 // Jump
-    private val BUTTON_B = 0x02 // Crouch
+    private val BUTTON_X = 0x04 
+    private val BUTTON_Y = 0x08 
+    private val BUTTON_A = 0x01 
+    private val BUTTON_B = 0x02 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_controller)
 
-        makeDiscoverable() // 🔥 Phone ko list mein lane ke liye
-        setupBluetoothHID()
+        // 🔥 Crash Fix 1: Check if Bluetooth is supported/enabled
+        if (btAdapter == null || !btAdapter.isEnabled) {
+            Toast.makeText(this, "Please Turn ON Bluetooth First!", Toast.LENGTH_LONG).show()
+            finish() // Activity close kar do crash hone se pehle
+            return
+        }
+
+        try {
+            makeDiscoverable()
+            setupBluetoothHID()
+        } catch (e: Exception) {
+            Toast.makeText(this, "HID not supported on this device", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
 
         val bgmiControls = mapOf(
             R.id.btn_fire to BUTTON_X,
@@ -55,11 +66,12 @@ class ControllerActivity : AppCompatActivity() {
     }
 
     private fun makeDiscoverable() {
-        // TV ko phone dikhane ke liye advertise mode on karna zaroori hai
-        val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-        }
-        startActivity(discoverableIntent)
+        try {
+            val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+            }
+            startActivity(discoverableIntent)
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     private fun setupBluetoothHID() {
@@ -68,7 +80,6 @@ class ControllerActivity : AppCompatActivity() {
                 if (profile == BluetoothProfile.HID_DEVICE) {
                     hidDevice = proxy as BluetoothHidDevice
                     
-                    // 🔥 ZAROORI: TV ko batana ki ye ek Gamepad hai
                     val sdp = BluetoothHidDeviceAppSdpSettings(
                         "Pro GFX Controller",
                         "Zenith Gamepad",
@@ -77,13 +88,18 @@ class ControllerActivity : AppCompatActivity() {
                         null
                     )
                     
-                    hidDevice?.registerApp(sdp, null, null, { it.run() }, object : BluetoothHidDevice.Callback() {
-                        override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
-                            runOnUiThread {
-                                if (registered) Toast.makeText(this@ControllerActivity, "Controller Ready: Pair with TV now!", Toast.LENGTH_LONG).show()
+                    // 🔥 Crash Fix 2: Wrap in try-catch and check null
+                    try {
+                        hidDevice?.registerApp(sdp, null, null, { it.run() }, object : BluetoothHidDevice.Callback() {
+                            override fun onAppStatusChanged(pluggedDevice: BluetoothDevice?, registered: Boolean) {
+                                runOnUiThread {
+                                    if (registered) Toast.makeText(this@ControllerActivity, "Controller Ready!", Toast.LENGTH_LONG).show()
+                                }
                             }
-                        }
-                    })
+                        })
+                    } catch (e: SecurityException) {
+                        runOnUiThread { Toast.makeText(this@ControllerActivity, "Permission Denied!", Toast.LENGTH_SHORT).show() }
+                    }
                 }
             }
             override fun onServiceDisconnected(profile: Int) {
@@ -117,9 +133,11 @@ class ControllerActivity : AppCompatActivity() {
     private fun sendHidReport(buttonCode: Int, isPressed: Boolean) {
         val report = ByteArray(3)
         report[0] = if (isPressed) buttonCode.toByte() else 0x00
-        hidDevice?.getConnectedDevices()?.forEach { device ->
-            hidDevice?.sendReport(device, 1, report)
-        }
+        try {
+            hidDevice?.getConnectedDevices()?.forEach { device ->
+                hidDevice?.sendReport(device, 1, report)
+            }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     private fun savePosition(v: View, key: String) {
