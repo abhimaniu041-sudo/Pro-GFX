@@ -11,7 +11,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.NotificationCompat
 import com.asgfx.bgmi.R
 import java.io.File
@@ -27,29 +26,13 @@ class FloatingControlService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Foreground Notification (Oreo+ support)
-        val channelId = "floating_panel_channel"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "GFX Service", NotificationManager.IMPORTANCE_LOW)
-            val manager = getSystemService(NotificationManager::class.java) as NotificationManager
-            manager.createNotificationChannel(channel)
-        }
+        // 1. Stable Foreground Start
+        startServiceInForeground()
 
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Pro GFX Active")
-            .setContentText("Floating control is running")
-            .setSmallIcon(R.drawable.ic_launcher)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
-
-        startForeground(101, notification)
-
-        // 2. Window Manager Initialization
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        val inflater = LayoutInflater.from(this)
-
+        
         try {
-            floatingView = inflater.inflate(R.layout.layout_floating_control, null)
+            floatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_control, null)
 
             val layoutType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -73,51 +56,67 @@ class FloatingControlService : Service() {
                 windowManager?.addView(floatingView, params)
             }
 
-            setupUIControls()
-            loadUserMods()
+            setupUI()
+            loadMods()
 
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Floating Error: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Overlay Error: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
-    private fun setupUIControls() {
-        floatingView?.let { view ->
-            val featurePage = view.findViewById<ScrollView>(R.id.featureContainer)
+    private fun startServiceInForeground() {
+        val channelId = "pro_gfx_channel"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, "Pro GFX Service", NotificationManager.IMPORTANCE_LOW)
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Pro GFX Menu Active")
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+
+        startForeground(101, notification)
+    }
+
+    private fun setupUI() {
+        floatingView?.let { v ->
+            val featurePage = v.findViewById<ScrollView>(R.id.featureContainer)
             
-            view.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
+            v.findViewById<ImageView>(R.id.btnHide).setOnClickListener {
                 isExpanded = !isExpanded
                 featurePage.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
 
-            view.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
-                val launchIntent = packageManager.getLaunchIntentForPackage("com.pubg.imobile")
-                launchIntent?.let {
+            v.findViewById<ImageView>(R.id.btnRunBgmi).setOnClickListener {
+                packageManager.getLaunchIntentForPackage("com.pubg.imobile")?.let {
                     it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     startActivity(it)
                 } ?: Toast.makeText(this, "Game not found", Toast.LENGTH_SHORT).show()
             }
 
-            view.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
+            v.findViewById<ImageView>(R.id.btnClose).setOnClickListener {
                 stopSelf()
             }
         }
     }
 
-    private fun loadUserMods() {
-        floatingView?.let { view ->
-            val container = view.findViewById<LinearLayout>(R.id.modListLayout)
+    private fun loadMods() {
+        floatingView?.let { v ->
+            val container = v.findViewById<LinearLayout>(R.id.modListLayout)
             val prefs = getSharedPreferences("ModSettings", Context.MODE_PRIVATE)
-            val configFolder = File(getExternalFilesDir(null), "Configs")
-            val files = configFolder.listFiles { f -> f.extension == "zip" }
+            val files = File(getExternalFilesDir(null), "Configs").listFiles { f -> f.extension == "zip" }
 
             container.removeAllViews()
             files?.forEach { file ->
                 if (prefs.getBoolean(file.name, false)) {
-                    val modView = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
-                    modView.findViewById<TextView>(R.id.tvModName).text = file.name
-                    container.addView(modView)
+                    val modRow = LayoutInflater.from(this).inflate(R.layout.item_mod_switch, null)
+                    modRow.findViewById<TextView>(R.id.tvModName).text = file.name
+                    container.addView(modRow)
                 }
             }
         }
