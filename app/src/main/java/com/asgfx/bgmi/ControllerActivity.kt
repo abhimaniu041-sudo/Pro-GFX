@@ -20,7 +20,6 @@ class ControllerActivity : AppCompatActivity() {
     private val btAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     private var isEditMode = false
 
-    // Standard HID Mapping
     private val KEY_MAP = mapOf(
         "FIRE" to 0x04, "SCOPE" to 0x08, "JUMP" to 0x01,
         "CROUCH" to 0x02, "PRONE" to 0x10, "RELOAD" to 0x20,
@@ -31,22 +30,37 @@ class ControllerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_controller)
 
-        // 🛡️ CRASH FIX: Check Permissions for Android 12+
+        // 🔥 STEP 1: Crash Fix - Check Permissions Properly
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_ADVERTISE), 101)
-                return
+            } else {
+                initBluetoothSafely()
             }
+        } else {
+            initBluetoothSafely()
         }
 
+        setupUI()
+    }
+
+    private fun initBluetoothSafely() {
         if (btAdapter == null || !btAdapter.isEnabled) {
-            Toast.makeText(this, "Please enable Bluetooth first", Toast.LENGTH_SHORT).show()
-            finish()
+            Toast.makeText(this, "Please enable Bluetooth", Toast.LENGTH_SHORT).show()
             return
         }
-
         setupBluetoothHID()
+    }
 
+    // 🔥 STEP 2: Handle Permission Result to prevent crash on first run
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            initBluetoothSafely()
+        }
+    }
+
+    private fun setupUI() {
         val controls = mapOf(
             R.id.btn_fire_left to "FIRE", R.id.btn_scope to "SCOPE",
             R.id.btn_jump to "JUMP", R.id.btn_crouch to "CROUCH",
@@ -72,16 +86,19 @@ class ControllerActivity : AppCompatActivity() {
     private fun setupBluetoothHID() {
         try {
             btAdapter?.getProfileProxy(this, object : BluetoothProfile.ServiceListener {
+                @SuppressLint("MissingPermission")
                 override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-                    hidDevice = proxy as BluetoothHidDevice
-                    val sdp = BluetoothHidDeviceAppSdpSettings(
-                        "Zenith Pad", "Gamepad", "Google", BluetoothHidDevice.SUBCLASS1_COMBO, null
-                    )
-                    hidDevice?.registerApp(sdp, null, null, { it.run() }, object : BluetoothHidDevice.Callback() {
-                        override fun onAppStatusChanged(device: BluetoothDevice?, reg: Boolean) {
-                            if (reg) runOnUiThread { Toast.makeText(this@ControllerActivity, "HID Ready!", Toast.LENGTH_SHORT).show() }
-                        }
-                    })
+                    if (profile == BluetoothProfile.HID_DEVICE) {
+                        hidDevice = proxy as BluetoothHidDevice
+                        val sdp = BluetoothHidDeviceAppSdpSettings(
+                            "Zenith Pad", "Gamepad", "Google", BluetoothHidDevice.SUBCLASS1_COMBO, null
+                        )
+                        hidDevice?.registerApp(sdp, null, null, { it.run() }, object : BluetoothHidDevice.Callback() {
+                            override fun onAppStatusChanged(device: BluetoothDevice?, reg: Boolean) {
+                                if (reg) runOnUiThread { Toast.makeText(this@ControllerActivity, "HID Ready!", Toast.LENGTH_SHORT).show() }
+                            }
+                        })
+                    }
                 }
                 override fun onServiceDisconnected(p: Int) { hidDevice = null }
             }, BluetoothProfile.HID_DEVICE)
@@ -99,9 +116,8 @@ class ControllerActivity : AppCompatActivity() {
                     MotionEvent.ACTION_UP -> savePosition(v, v.id.toString())
                 }
             } else {
-                if (cmd == "JOYSTICK") {
-                    handleJoystick(event)
-                } else {
+                if (cmd == "JOYSTICK") handleJoystick(event)
+                else {
                     val code = KEY_MAP[cmd] ?: 0x00
                     when (event.action) {
                         MotionEvent.ACTION_DOWN -> sendReport(code, true)
@@ -113,19 +129,18 @@ class ControllerActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun handleJoystick(event: MotionEvent) {
-        // Joystick movement logic for TV
-        val x = ((event.x / findViewById<View>(R.id.joystick_base).width) * 255).toInt()
-        val y = ((event.y / findViewById<View>(R.id.joystick_base).height) * 255).toInt()
-        val report = ByteArray(3)
-        report[1] = x.toByte()
-        report[2] = y.toByte()
+        val view = findViewById<View>(R.id.joystick_base) ?: return
+        val x = ((event.x / view.width) * 255).toInt().coerceIn(0, 255)
+        val y = ((event.y / view.height) * 255).toInt().coerceIn(0, 255)
+        val report = byteArrayOf(0x00, x.toByte(), y.toByte())
         hidDevice?.getConnectedDevices()?.forEach { hidDevice?.sendReport(it, 1, report) }
     }
 
+    @SuppressLint("MissingPermission")
     private fun sendReport(code: Int, pressed: Boolean) {
-        val report = ByteArray(3)
-        report[0] = if (pressed) code.toByte() else 0x00
+        val report = byteArrayOf((if (pressed) code else 0).toByte(), 0x00, 0x00)
         try {
             hidDevice?.getConnectedDevices()?.forEach { hidDevice?.sendReport(it, 1, report) }
         } catch (e: Exception) { e.printStackTrace() }
