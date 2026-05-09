@@ -1,73 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/controllerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <View
-        android:id="@+id/joystick_base"
-        android:layout_width="160dp"
-        android:layout_height="160dp"
+    <Button android:id="@+id/btn_fire_left"
+        android:layout_width="85dp" android:layout_height="85dp"
+        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="30dp"
         android:layout_marginStart="40dp"
+        android:text="FIRE" android:textColor="#FF1744"
         android:background="@drawable/btn_controller" />
 
-    <Button android:id="@+id/btn_sprint" 
-        android:layout_width="65dp" android:layout_height="65dp"
-        android:layout_toEndOf="@id/joystick_base"
+    <View android:id="@+id/joystick_base"
+        android:layout_width="140dp" android:layout_height="140dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginStart="60dp"
+        android:background="@drawable/btn_controller" />
+
+    <Button android:id="@+id/btn_sprint"
+        android:layout_width="55dp" android:layout_height="55dp"
         android:layout_above="@id/joystick_base"
-        android:text="SPRINT" android:textSize="8sp"
+        android:layout_alignStart="@id/joystick_base"
+        android:layout_marginBottom="20dp"
+        android:text="RUN" android:textSize="10sp"
         android:background="@drawable/btn_controller" />
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <Button android:id="@+id/btn_scope"
+        android:layout_width="80dp" android:layout_height="80dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="150dp"
+        android:text="SCOPE" android:textColor="#00E5FF"
+        android:background="@drawable/btn_controller" />
+
+    <Button android:id="@+id/btn_jump"
+        android:layout_width="70dp" android:layout_height="70dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="20dp">
+        android:layout_marginEnd="40dp"
+        android:text="JUMP"
+        android:background="@drawable/btn_controller" />
 
-        <Button android:id="@+id/btn_fire" 
-            android:layout_width="90dp" android:layout_height="90dp"
-            android:text="FIRE" android:textColor="#FF1744"
-            android:background="@drawable/btn_controller"
-            android:layout_margin="10dp" />
+    <Button android:id="@+id/btn_crouch"
+        android:layout_width="65dp" android:layout_height="65dp"
+        android:layout_below="@id/btn_jump"
+        android:layout_toStartOf="@id/btn_jump"
+        android:layout_marginTop="10dp"
+        android:text="CROUCH" android:textSize="9sp"
+        android:background="@drawable/btn_controller" />
 
-        <Button android:id="@+id/btn_scope" 
-            android:layout_width="75dp" android:layout_height="75dp"
-            android:layout_toEndOf="@id/btn_fire"
-            android:text="SCOPE" android:textColor="#00E5FF"
-            android:background="@drawable/btn_controller" />
+    <Button android:id="@+id/btn_prone"
+        android:layout_width="65dp" android:layout_height="65dp"
+        android:layout_below="@id/btn_jump"
+        android:layout_alignEnd="@id/btn_jump"
+        android:layout_marginTop="40dp"
+        android:text="PRONE" android:textSize="9sp"
+        android:background="@drawable/btn_controller" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btn_fire"
-            android:orientation="horizontal">
-            
-            <Button android:id="@+id/btn_jump" android:layout_width="65dp" android:layout_height="65dp"
-                android:text="JUMP" android:layout_margin="5dp" android:background="@drawable/btn_controller" />
-            
-            <Button android:id="@+id/btn_crouch" android:layout_width="65dp" android:layout_height="65dp"
-                android:text="CROUCH" android:layout_margin="5dp" android:background="@drawable/btn_controller" />
-                
-            <Button android:id="@+id/btn_prone" android:layout_width="65dp" android:layout_height="65dp"
-                android:text="PRONE" android:layout_margin="5dp" android:background="@drawable/btn_controller" />
-        </LinearLayout>
+    <Button android:id="@+id/btn_reload"
+        android:layout_width="60dp" android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="120dp"
+        android:text="RELOAD" android:textSize="9sp"
+        android:background="@drawable/btn_controller" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/btn_jump"
-            android:layout_marginTop="10dp">
-            
-            <Button android:id="@+id/btn_peek_left" android:layout_width="60dp" android:layout_height="60dp"
-                android:text="L-PEEK" android:background="@drawable/btn_controller" />
-            <Button android:id="@+id/btn_reload" android:layout_width="60dp" android:layout_height="60dp"
-                android:text="RELOAD" android:layout_marginHorizontal="10dp" android:background="@drawable/btn_controller" />
-            <Button android:id="@+id/btn_peek_right" android:layout_width="60dp" android:layout_height="60dp"
-                android:text="R-PEEK" android:background="@drawable/btn_controller" />
-        </LinearLayout>
-    </RelativeLayout>
+    <Button android:id="@+id/btn_peek_left"
+        android:layout_width="55dp" android:layout_height="55dp"
+        android:layout_toStartOf="@id/btn_scope"
+        android:layout_alignTop="@id/btn_scope"
+        android:layout_marginEnd="20dp"
+        android:text="L" android:background="@drawable/btn_controller" />
+
+    <Button android:id="@+id/btn_peek_right"
+        android:layout_width="55dp" android:layout_height="55dp"
+        android:layout_toEndOf="@id/btn_scope"
+        android:layout_alignTop="@id/btn_scope"
+        android:layout_marginStart="20dp"
+        android:text="R" android:background="@drawable/btn_controller" />
 
 </RelativeLayout>
